@@ -39,3 +39,5 @@ https://docs.google.com/spreadsheets/d/1BvNKHb2fRXxFoaLEjvXzlKXRe3I0byHC6Vco41DE
 ### Time Complexity of Various Algo
 
 ![IMG_8640](https://gist.github.com/user-attachments/assets/5f755b20-3c71-4bfd-aa0f-c10f021acf23)
+
+![image](https://gist.github.com/user-attachments/assets/95f8af40-5f8d-4c5e-84ae-6a6f44cfbcf4)
