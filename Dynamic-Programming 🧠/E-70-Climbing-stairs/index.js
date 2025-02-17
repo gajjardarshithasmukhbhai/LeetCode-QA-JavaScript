@@ -1,3 +1,0 @@
-const climbStairs = function (n) {
-
-};
