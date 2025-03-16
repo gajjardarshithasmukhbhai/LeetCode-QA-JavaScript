@@ -38,6 +38,6 @@ https://docs.google.com/spreadsheets/d/1BvNKHb2fRXxFoaLEjvXzlKXRe3I0byHC6Vco41DE
 
 ### Time Complexity of Various Algo
 
-![IMG_8640](images/5f755b20-3c71-4bfd-aa0f-398005613-5f755b20-3c71-4bfd-aa0f-c10f021acf23.png)
+![IMG_8640](images/398005613-5f755b20-3c71-4bfd-aa0f-c10f021acf23.png)
 
 ![image](images/405746564-95f8af40-5f8d-4c5e-84ae-6a6f44cfbcf4.png)
