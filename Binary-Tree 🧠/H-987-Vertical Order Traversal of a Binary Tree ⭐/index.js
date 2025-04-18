@@ -10,6 +10,16 @@
  * @param {TreeNode} root
  * @return {number[][]}
  */
+
+class TreeNode {
+    constructor(val, left = null, right = null) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+
 const verticalTraversal = (root) => {
     if(!root) return [];
     
@@ -57,3 +67,16 @@ const verticalTraversal = (root) => {
     return result;
 
 };
+
+const root = new TreeNode(3);
+root.left = new TreeNode(9);
+root.right = new TreeNode(8);
+
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(0);
+
+root.right.left = new TreeNode(1);
+root.right.right = new TreeNode(7);
+
+
+console.log(verticalTraversal(root));
