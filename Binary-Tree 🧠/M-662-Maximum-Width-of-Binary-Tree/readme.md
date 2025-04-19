@@ -34,4 +34,10 @@ A level's width is defined as the count of nodes between the **leftmost** and **
  /           \
 1             3
 
-- so condition 1 and condition 2 satisfy, so total 8 nodes possible because from 3 and 2 imaginary nodes come and further it'll expands
+- so condition 1 and condition 2 satisfy, so total 8 nodes possible because from 3 and 2 imaginary nodes come and further it'll expands.
+
+
+so For Approach we can use like this:
+- For Left ==> (2*i+1)
+- For Right ==> (2*i+2)
+![IMG_8640](images/Maximum-Width-of-Binary-Tree-Code.jpg)
