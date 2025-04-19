@@ -40,4 +40,9 @@ A level's width is defined as the count of nodes between the **leftmost** and **
 so For Approach we can use like this:
 - For Left ==> (2*i+1)
 - For Right ==> (2*i+2)
-![IMG_8640](images/Maximum-Width-of-Binary-Tree-Code.jpg)
+![IMG_8640](../../images/Maximum-Width-of-Binary-Tree-Code.jpg)
+
+- But in this approach, one catch is there like If value goes to 10^5. so number will exceeded.
+- so to solved this Issue, we need to reset the Number like below
+
+![IMG_8640](../../images/L28-Maximum-Width-of-Binary-Tree.jpg)
