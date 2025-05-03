@@ -9,6 +9,7 @@ const floodFill = (image, sr, sc, newColor) => {
     const imageCopy = [...image];
     const initColor = image[sr][sc];
 
+    // strategy to check up,down,left and right
     let directions = [ 
         { dr: -1, dc: 0 },  // up
         { dr: 1, dc: 0 },   // down
