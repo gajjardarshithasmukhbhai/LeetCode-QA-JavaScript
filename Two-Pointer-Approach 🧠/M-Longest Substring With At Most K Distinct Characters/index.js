@@ -1,4 +1,4 @@
-const longestKDistictEle = (nums) => {
+const longestKDistictEle = (nums, k) => {
 
     let left = 0;
     let right = 0;
@@ -8,7 +8,7 @@ const longestKDistictEle = (nums) => {
     while(right < nums.length) {
         hasMap.set(nums[right], (hasMap.get(nums[right]) || 0) + 1);
 
-        while(hasMap.size > 2) {
+        while(hasMap.size > k) {
             hasMap.set(nums[right], hasMap.get(nums[right])-1);
             if(hasMap.get(nums[right])===0) {
                 hasMap.delete(nums[right]);
