@@ -10,3 +10,26 @@ var majorityElement = function(nums) {
     }
     return 0;
 };
+
+const majorityElement = (nums) => {
+    let count = 0;
+    let ele;
+
+    for (let i=0;i<nums.length;i++) {
+        if (count === 0) {
+            count = 1;
+            ele = nums[i];
+        }
+        else if(nums[i] === ele) {
+            count++;
+        }
+        else {
+            count --;
+        }
+    }
+
+    for(let j=0;j < nums.length;j++) {
+        if(count > Math.floor(nums.length/2)) return ele;
+    }
+    return -1;
+};
