@@ -25,3 +25,5 @@ const majorityElement = (nums) => {
     if(totalCount > Math.floor(nums.length/2)) return ele;
     return -1;
 };
+
+
