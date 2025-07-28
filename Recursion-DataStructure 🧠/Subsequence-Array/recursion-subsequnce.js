@@ -17,5 +17,5 @@ const subList = (arr) => {
     helper(0, []); // start the Recursion
     return result;
 }
-
+// Take and Non Take
 console.log(subList([3, 2, 1])); // Array(8) [ [ 3, 2, 1 ], [ 3, 2 ], [ 3, 1 ], [ 3 ], [ 2, 1 ], [ 2 ], [ 1 ], [] ]
