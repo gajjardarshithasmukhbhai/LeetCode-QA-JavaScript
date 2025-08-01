@@ -1,3 +1,4 @@
+// with String
 const continousSubarray = (values) => {
     let result = [];
     for(let i=0;i<values.length;i++) {
@@ -12,4 +13,19 @@ const continousSubarray = (values) => {
 
 console.log(continousSubarray([1,3,2]));
 
+// without String
+
 // BrutForce Approach
+const continousSubarray = (values) => {
+    let result = [];
+    for(let i=0;i<values.length;i++) {
+        let subArray = [];
+        for(let j=i;j<values.length;j++) {
+            subArray.push(values[j]);
+            result.push([...subArray]);
+        }
+    }
+    return result = Array.from(result).map(values => values);
+}
+
+console.log(continousSubarray([1,3,2]));
