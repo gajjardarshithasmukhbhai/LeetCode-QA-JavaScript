@@ -164,3 +164,1705 @@ https://docs.google.com/spreadsheets/d/1BvNKHb2fRXxFoaLEjvXzlKXRe3I0byHC6Vco41DE
 |                                 | Quick Sort        | O(n log n) avg  | O(log n)         | O(n^2) worst case                      |
 |                                 | Heap Sort         | O(n log n)      | O(1)             |                                        |
 | **Trie**                        | Insert/Search     | O(L)            | O(ALPHABET * N)  | L = word length, N = words             |
+
+## Algorithms Insights & JavaScript Implementations
+
+### 1. Two Pointers Technique
+
+**Description:** A technique that uses two pointers to traverse data structures, typically arrays or strings, from different positions. The pointers can move towards each other, in the same direction, or at different speeds. This approach is particularly effective for problems involving pairs or comparisons between elements at different positions.
+
+**Core Concept:** Instead of using nested loops (O(n²)), we use two pointers to reduce time complexity to O(n). The key insight is that by maintaining certain properties (like sorted order), we can eliminate the need to check all possible combinations.
+
+**When to use:** Array/string problems involving pairs, triplets, or when you need to compare elements from different positions.
+
+**Use cases:** Remove duplicates, find pairs with target sum, palindrome checking, merge sorted arrays.
+
+```javascript
+// Two Sum (sorted array)
+function twoSum(nums, target) {
+    let left = 0, right = nums.length - 1;
+    
+    while (left < right) {
+        const sum = nums[left] + nums[right];
+        if (sum === target) return [left, right];
+        else if (sum < target) left++;
+        else right--;
+    }
+    return [];
+}
+
+// Remove duplicates from sorted array
+function removeDuplicates(nums) {
+    if (nums.length <= 1) return nums.length;
+    
+    let writeIndex = 1;
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] !== nums[i - 1]) {
+            nums[writeIndex++] = nums[i];
+        }
+    }
+    return writeIndex;
+}
+```
+
+### 2. Sliding Window
+
+**Description:** A technique that maintains a window (subarray) of elements and slides it across the data structure. The window can be of fixed or variable size. As the window slides, elements are added to one end and removed from the other, maintaining certain properties or constraints.
+
+**Core Concept:** Instead of recalculating the result for every subarray from scratch, we incrementally update our result by adding new elements and removing old ones. This transforms O(n×k) or O(n²) solutions into O(n) solutions.
+
+**When to use:** Subarray/substring problems with contiguous elements, especially with size constraints.
+
+**Use cases:** Maximum subarray sum, longest substring without repeating characters, minimum window substring.
+
+```javascript
+// Fixed size sliding window - max sum of k elements
+function maxSumSubarray(nums, k) {
+    let maxSum = 0, windowSum = 0;
+    
+    // Calculate sum of first window
+    for (let i = 0; i < k; i++) {
+        windowSum += nums[i];
+    }
+    maxSum = windowSum;
+    
+    // Slide the window
+    for (let i = k; i < nums.length; i++) {
+        windowSum = windowSum - nums[i - k] + nums[i];
+        maxSum = Math.max(maxSum, windowSum);
+    }
+    return maxSum;
+}
+
+// Variable size sliding window - longest substring without repeating chars
+function lengthOfLongestSubstring(s) {
+    const seen = new Set();
+    let left = 0, maxLength = 0;
+    
+    for (let right = 0; right < s.length; right++) {
+        while (seen.has(s[right])) {
+            seen.delete(s[left]);
+            left++;
+        }
+        seen.add(s[right]);
+        maxLength = Math.max(maxLength, right - left + 1);
+    }
+    return maxLength;
+}
+```
+
+### 3. Binary Search
+
+**Description:** A search algorithm that works on sorted arrays by repeatedly dividing the search interval in half. It compares the target value to the middle element and eliminates half of the remaining elements based on the comparison.
+
+**Core Concept:** Binary search exploits the sorted property to achieve O(log n) time complexity. The key insight is the invariant: if the array is sorted and we're looking for a target, we can determine which half of the array to search based on comparing the target with the middle element.
+
+**When to use:** Searching in sorted arrays, finding boundaries, optimization problems with monotonic functions.
+
+**Use cases:** Search insert position, find peak element, search in rotated array, square root.
+
+```javascript
+// Classic binary search
+function binarySearch(nums, target) {
+    let left = 0, right = nums.length - 1;
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (nums[mid] === target) return mid;
+        else if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+
+// Find first/last occurrence
+function searchRange(nums, target) {
+    const findFirst = () => {
+        let left = 0, right = nums.length - 1, result = -1;
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            if (nums[mid] === target) {
+                result = mid;
+                right = mid - 1; // Continue searching left
+            } else if (nums[mid] < target) left = mid + 1;
+            else right = mid - 1;
+        }
+        return result;
+    };
+    
+    const findLast = () => {
+        let left = 0, right = nums.length - 1, result = -1;
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            if (nums[mid] === target) {
+                result = mid;
+                left = mid + 1; // Continue searching right
+            } else if (nums[mid] < target) left = mid + 1;
+            else right = mid - 1;
+        }
+        return result;
+    };
+    
+    return [findFirst(), findLast()];
+}
+```
+
+### 4. Depth-First Search (DFS)
+
+**Description:** A graph traversal algorithm that explores as far as possible along each branch before backtracking. It uses a stack (either explicitly or through recursion) to keep track of the path. DFS visits a node, then recursively visits all its unvisited neighbors.
+
+**Core Concept:** DFS explores the depth of the graph first. It's naturally recursive and uses the call stack to remember where to backtrack. The algorithm maintains a visited set to avoid cycles and ensures each node is processed exactly once.
+
+**When to use:** Tree/graph traversal, backtracking problems, connected components, cycle detection.
+
+**Use cases:** Tree traversal, island counting, path finding, permutations/combinations.
+
+```javascript
+// DFS for binary tree traversal
+function inorderTraversal(root) {
+    const result = [];
+    
+    function dfs(node) {
+        if (!node) return;
+        dfs(node.left);
+        result.push(node.val);
+        dfs(node.right);
+    }
+    
+    dfs(root);
+    return result;
+}
+
+// DFS for graph (adjacency list)
+function dfsGraph(graph, start, visited = new Set()) {
+    visited.add(start);
+    console.log(start); // Process node
+    
+    for (const neighbor of graph[start] || []) {
+        if (!visited.has(neighbor)) {
+            dfsGraph(graph, neighbor, visited);
+        }
+    }
+}
+
+// Number of islands using DFS
+function numIslands(grid) {
+    if (!grid || grid.length === 0) return 0;
+    
+    let islands = 0;
+    const rows = grid.length, cols = grid[0].length;
+    
+    function dfs(i, j) {
+        if (i < 0 || i >= rows || j < 0 || j >= cols || grid[i][j] === '0') {
+            return;
+        }
+        grid[i][j] = '0'; // Mark as visited
+        dfs(i + 1, j);
+        dfs(i - 1, j);
+        dfs(i, j + 1);
+        dfs(i, j - 1);
+    }
+    
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (grid[i][j] === '1') {
+                islands++;
+                dfs(i, j);
+            }
+        }
+    }
+    return islands;
+}
+```
+
+### 5. Breadth-First Search (BFS)
+
+**Description:** A graph traversal algorithm that explores all nodes at the current depth before moving to nodes at the next depth level. It uses a queue to process nodes in the order they were discovered, ensuring the shortest path in unweighted graphs.
+
+**Core Concept:** BFS explores the breadth of the graph/tree first. It guarantees that when a node is visited, the shortest path from the source to that node has been found (in unweighted graphs). The queue ensures FIFO processing, maintaining the level-by-level exploration.
+
+**When to use:** Shortest path in unweighted graphs, level-order traversal, minimum steps problems.
+
+**Use cases:** Binary tree level order, shortest path, minimum steps to reach target.
+
+```javascript
+// BFS for binary tree level order traversal
+function levelOrder(root) {
+    if (!root) return [];
+    
+    const result = [];
+    const queue = [root];
+    
+    while (queue.length > 0) {
+        const levelSize = queue.length;
+        const currentLevel = [];
+        
+        for (let i = 0; i < levelSize; i++) {
+            const node = queue.shift();
+            currentLevel.push(node.val);
+            
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        result.push(currentLevel);
+    }
+    return result;
+}
+
+// BFS for shortest path in grid
+function shortestPath(grid, start, end) {
+    const [startRow, startCol] = start;
+    const [endRow, endCol] = end;
+    const rows = grid.length, cols = grid[0].length;
+    
+    const queue = [[startRow, startCol, 0]]; // [row, col, distance]
+    const visited = new Set();
+    visited.add(`${startRow},${startCol}`);
+    
+    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    
+    while (queue.length > 0) {
+        const [row, col, dist] = queue.shift();
+        
+        if (row === endRow && col === endCol) {
+            return dist;
+        }
+        
+        for (const [dr, dc] of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            const key = `${newRow},${newCol}`;
+            
+            if (newRow >= 0 && newRow < rows && 
+                newCol >= 0 && newCol < cols && 
+                grid[newRow][newCol] === 0 && 
+                !visited.has(key)) {
+                
+                visited.add(key);
+                queue.push([newRow, newCol, dist + 1]);
+            }
+        }
+    }
+    return -1; // Path not found
+}
+```
+
+### 6. Dynamic Programming
+
+**Description:** A method for solving complex problems by breaking them down into simpler subproblems. It stores the results of subproblems to avoid computing the same results repeatedly. DP is applicable when a problem has optimal substructure and overlapping subproblems.
+
+**Core Concept:** DP optimizes recursive solutions by storing (memoizing) results of subproblems. The key insight is that many problems can be broken down into smaller, similar problems, and the optimal solution can be constructed from optimal solutions of subproblems.
+
+**Types:**
+- **Memoization (Top-down):** Start with the original problem and recursively break it down, storing results
+- **Tabulation (Bottom-up):** Start with the smallest subproblems and build up to the solution
+
+**When to use:** Optimization problems with overlapping subproblems and optimal substructure.
+
+**Use cases:** Fibonacci, coin change, longest common subsequence, knapsack problems.
+
+```javascript
+// Fibonacci with memoization (top-down DP)
+function fibMemo(n, memo = {}) {
+    if (n in memo) return memo[n];
+    if (n <= 1) return n;
+    
+    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+    return memo[n];
+}
+
+// Coin change problem (bottom-up DP)
+function coinChange(coins, amount) {
+    const dp = new Array(amount + 1).fill(Infinity);
+    dp[0] = 0;
+    
+    for (let i = 1; i <= amount; i++) {
+        for (const coin of coins) {
+            if (coin <= i) {
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+    }
+    return dp[amount] === Infinity ? -1 : dp[amount];
+}
+
+// Longest Common Subsequence
+function longestCommonSubsequence(text1, text2) {
+    const m = text1.length, n = text2.length;
+    const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+    
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (text1[i - 1] === text2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[m][n];
+}
+```
+
+### 7. Backtracking
+
+**Description:** A systematic method for solving problems by exploring all possible solutions incrementally. It builds candidates to the solution step by step and abandons candidates ("backtracks") when they cannot lead to a valid solution.
+
+**Core Concept:** Backtracking is like a depth-first search of a solution tree. It tries partial solutions and abandons them if they don't lead to a complete solution. The key is to recognize when a partial solution cannot be extended to a valid complete solution.
+
+**Template:**
+1. Choose: Make a choice from available options
+2. Explore: Recursively explore the consequences
+3. Unchoose: Undo the choice (backtrack) and try the next option
+
+**When to use:** Generate all possible solutions, constraint satisfaction problems.
+
+**Use cases:** N-Queens, Sudoku solver, permutations, combinations, word search.
+
+```javascript
+// Generate all permutations
+function permute(nums) {
+    const result = [];
+    
+    function backtrack(current) {
+        if (current.length === nums.length) {
+            result.push([...current]);
+            return;
+        }
+        
+        for (const num of nums) {
+            if (current.includes(num)) continue;
+            
+            current.push(num);
+            backtrack(current);
+            current.pop(); // backtrack
+        }
+    }
+    
+    backtrack([]);
+    return result;
+}
+
+// Word search in grid
+function wordSearch(board, word) {
+    const rows = board.length, cols = board[0].length;
+    
+    function backtrack(row, col, index) {
+        if (index === word.length) return true;
+        
+        if (row < 0 || row >= rows || col < 0 || col >= cols || 
+            board[row][col] !== word[index]) {
+            return false;
+        }
+        
+        const temp = board[row][col];
+        board[row][col] = '#'; // mark as visited
+        
+        const found = backtrack(row + 1, col, index + 1) ||
+                     backtrack(row - 1, col, index + 1) ||
+                     backtrack(row, col + 1, index + 1) ||
+                     backtrack(row, col - 1, index + 1);
+        
+        board[row][col] = temp; // restore
+        return found;
+    }
+    
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (backtrack(i, j, 0)) return true;
+        }
+    }
+    return false;
+}
+```
+
+### 8. Greedy Algorithm
+
+**Description:** An algorithmic approach that makes the locally optimal choice at each step, hoping to find a global optimum. It makes decisions based on the information available at the current step without considering the global picture.
+
+**Core Concept:** Greedy algorithms work when the problem has the "greedy choice property" - a global optimum can be arrived at by making locally optimal choices. The challenge is proving that the greedy choice leads to an optimal solution.
+
+**Key Properties:**
+- **Greedy Choice Property:** A global optimum can be reached by making locally optimal choices
+- **Optimal Substructure:** The optimal solution contains optimal solutions to subproblems
+
+**When to use:** Optimization problems where local optimal choices lead to global optimum.
+
+**Use cases:** Activity selection, minimum spanning tree, huffman coding, interval scheduling.
+
+```javascript
+// Activity selection problem
+function activitySelection(activities) {
+    // Sort by end time
+    activities.sort((a, b) => a.end - b.end);
+    
+    const selected = [activities[0]];
+    let lastEnd = activities[0].end;
+    
+    for (let i = 1; i < activities.length; i++) {
+        if (activities[i].start >= lastEnd) {
+            selected.push(activities[i]);
+            lastEnd = activities[i].end;
+        }
+    }
+    return selected;
+}
+
+// Jump game
+function canJump(nums) {
+    let maxReach = 0;
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (i > maxReach) return false;
+        maxReach = Math.max(maxReach, i + nums[i]);
+        if (maxReach >= nums.length - 1) return true;
+    }
+    return true;
+}
+```
+
+### 9. Union-Find (Disjoint Set)
+
+**Description:** A data structure that keeps track of elements partitioned into disjoint (non-overlapping) sets. It supports two main operations: finding which set an element belongs to, and uniting two sets. With optimizations, both operations can be performed in nearly constant time.
+
+**Core Concept:** Union-Find maintains a forest of trees where each tree represents a set. The root of each tree is the representative of the set. Path compression and union by rank optimizations make operations very efficient.
+
+**Key Optimizations:**
+- **Path Compression:** During find operations, make all nodes point directly to the root
+- **Union by Rank:** Always attach the smaller tree under the root of the larger tree
+
+**When to use:** Dynamic connectivity problems, cycle detection in graphs, grouping elements.
+
+**Use cases:** Number of connected components, redundant connections, accounts merge.
+
+```javascript
+class UnionFind {
+    constructor(n) {
+        this.parent = Array.from({length: n}, (_, i) => i);
+        this.rank = new Array(n).fill(0);
+        this.components = n;
+    }
+    
+    find(x) {
+        if (this.parent[x] !== x) {
+            this.parent[x] = this.find(this.parent[x]); // Path compression
+        }
+        return this.parent[x];
+    }
+    
+    union(x, y) {
+        const rootX = this.find(x);
+        const rootY = this.find(y);
+        
+        if (rootX !== rootY) {
+            // Union by rank
+            if (this.rank[rootX] < this.rank[rootY]) {
+                this.parent[rootX] = rootY;
+            } else if (this.rank[rootX] > this.rank[rootY]) {
+                this.parent[rootY] = rootX;
+            } else {
+                this.parent[rootY] = rootX;
+                this.rank[rootX]++;
+            }
+            this.components--;
+            return true;
+        }
+        return false;
+    }
+    
+    isConnected(x, y) {
+        return this.find(x) === this.find(y);
+    }
+}
+
+// Number of connected components
+function countComponents(n, edges) {
+    const uf = new UnionFind(n);
+    
+    for (const [u, v] of edges) {
+        uf.union(u, v);
+    }
+    
+    return uf.components;
+}
+```
+
+### 10. Sorting Algorithms
+
+**Description:** Algorithms that arrange elements in a specific order (usually ascending or descending). Different sorting algorithms have different time/space complexities and are suitable for different scenarios.
+
+**Core Concepts:**
+- **Comparison-based vs Non-comparison:** Some sorts compare elements, others use element properties
+- **Stable vs Unstable:** Stable sorts preserve the relative order of equal elements
+- **In-place vs Out-of-place:** In-place sorts use O(1) extra space
+- **Adaptive:** Performance improves on partially sorted data
+
+**When to use:** Different scenarios require different sorting approaches based on constraints.
+
+**Algorithm Characteristics:**
+- **Quick Sort:** Fast average case, in-place, unstable
+- **Merge Sort:** Guaranteed O(n log n), stable, requires O(n) space
+- **Heap Sort:** Guaranteed O(n log n), in-place, unstable
+- **Insertion Sort:** Good for small arrays, adaptive, stable
+
+```javascript
+// Quick Sort - average O(n log n), good for general purpose
+function quickSort(arr, low = 0, high = arr.length - 1) {
+    if (low < high) {
+        const pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+    return arr;
+}
+
+function partition(arr, low, high) {
+    const pivot = arr[high];
+    let i = low - 1;
+    
+    for (let j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+    return i + 1;
+}
+
+// Merge Sort - guaranteed O(n log n), stable
+function mergeSort(arr) {
+    if (arr.length <= 1) return arr;
+    
+    const mid = Math.floor(arr.length / 2);
+    const left = mergeSort(arr.slice(0, mid));
+    const right = mergeSort(arr.slice(mid));
+    
+    return merge(left, right);
+}
+
+function merge(left, right) {
+    const result = [];
+    let i = 0, j = 0;
+    
+    while (i < left.length && j < right.length) {
+        if (left[i] <= right[j]) {
+            result.push(left[i++]);
+        } else {
+            result.push(right[j++]);
+        }
+    }
+    
+    return result.concat(left.slice(i)).concat(right.slice(j));
+}
+```
+
+### 11. Recursion Patterns
+
+**Description:** Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem. The take/non-take approach is a specific recursive pattern where at each step, we have a choice to either include (take) or exclude (non-take) the current element.
+
+**Core Concept:** Recursion breaks down complex problems into simpler subproblems. The take/non-take pattern is particularly powerful for:
+- Generating all possible combinations/subsets
+- Making binary choices at each step
+- Exploring all possible decision paths
+
+**Key Components:**
+- **Base Case:** The condition that stops recursion
+- **Recursive Case:** The function calling itself with modified parameters
+- **Decision Tree:** Each recursive call represents a decision point
+
+**When to use:** Problems involving choices, combinations, subsets, or when you need to explore all possibilities.
+
+**Use cases:** Subset generation, combination sum, coin change variations, 0/1 knapsack, path counting.
+
+```javascript
+// 1. Generate all subsets (Power Set) - Classic Take/Non-Take
+function subsets(nums) {
+    const result = [];
+    
+    function generateSubsets(index, currentSubset) {
+        // Base case: processed all elements
+        if (index === nums.length) {
+            result.push([...currentSubset]);
+            return;
+        }
+        
+        // Non-take: don't include current element
+        generateSubsets(index + 1, currentSubset);
+        
+        // Take: include current element
+        currentSubset.push(nums[index]);
+        generateSubsets(index + 1, currentSubset);
+        currentSubset.pop(); // backtrack
+    }
+    
+    generateSubsets(0, []);
+    return result;
+}
+
+// 2. Combination Sum - Take/Non-Take with repetition allowed
+function combinationSum(candidates, target) {
+    const result = [];
+    
+    function findCombinations(index, currentSum, currentCombination) {
+        // Base cases
+        if (currentSum === target) {
+            result.push([...currentCombination]);
+            return;
+        }
+        if (index === candidates.length || currentSum > target) {
+            return;
+        }
+        
+        // Non-take: move to next candidate
+        findCombinations(index + 1, currentSum, currentCombination);
+        
+        // Take: include current candidate (can be reused)
+        currentCombination.push(candidates[index]);
+        findCombinations(index, currentSum + candidates[index], currentCombination);
+        currentCombination.pop(); // backtrack
+    }
+    
+    findCombinations(0, 0, []);
+    return result;
+}
+
+// 3. 0/1 Knapsack - Take/Non-Take with weight constraint
+function knapsack(weights, values, capacity) {
+    function maxValue(index, remainingCapacity) {
+        // Base case: no items left or no capacity
+        if (index === weights.length || remainingCapacity === 0) {
+            return 0;
+        }
+        
+        // Non-take: skip current item
+        let exclude = maxValue(index + 1, remainingCapacity);
+        
+        // Take: include current item (if it fits)
+        let include = 0;
+        if (weights[index] <= remainingCapacity) {
+            include = values[index] + maxValue(index + 1, remainingCapacity - weights[index]);
+        }
+        
+        return Math.max(include, exclude);
+    }
+    
+    return maxValue(0, capacity);
+}
+
+// 4. Count ways to make target sum - Take/Non-Take counting
+function countWaysToSum(nums, target) {
+    function countWays(index, currentSum) {
+        // Base cases
+        if (currentSum === target) return 1;
+        if (index === nums.length || currentSum > target) return 0;
+        
+        // Non-take: skip current number
+        let exclude = countWays(index + 1, currentSum);
+        
+        // Take: include current number
+        let include = countWays(index + 1, currentSum + nums[index]);
+        
+        return include + exclude;
+    }
+    
+    return countWays(0, 0);
+}
+
+// 5. Partition Equal Subset Sum - Take/Non-Take with target
+function canPartition(nums) {
+    const totalSum = nums.reduce((sum, num) => sum + num, 0);
+    
+    // If total sum is odd, can't partition into two equal subsets
+    if (totalSum % 2 !== 0) return false;
+    
+    const target = totalSum / 2;
+    
+    function canMakeSum(index, currentSum) {
+        // Base cases
+        if (currentSum === target) return true;
+        if (index === nums.length || currentSum > target) return false;
+        
+        // Take current number or don't take it
+        return canMakeSum(index + 1, currentSum + nums[index]) || 
+               canMakeSum(index + 1, currentSum);
+    }
+    
+    return canMakeSum(0, 0);
+}
+
+// 6. Generate Parentheses - Take/Non-Take with constraints
+function generateParenthesis(n) {
+    const result = [];
+    
+    function generate(current, open, close) {
+        // Base case: used all parentheses
+        if (current.length === 2 * n) {
+            result.push(current);
+            return;
+        }
+        
+        // Take opening bracket (if we can)
+        if (open < n) {
+            generate(current + '(', open + 1, close);
+        }
+        
+        // Take closing bracket (if we can)
+        if (close < open) {
+            generate(current + ')', open, close + 1);
+        }
+    }
+    
+    generate('', 0, 0);
+    return result;
+}
+
+// 7. Path Sum in Binary Tree - Take/Non-Take paths
+function hasPathSum(root, targetSum) {
+    if (!root) return false;
+    
+    function findPath(node, currentSum) {
+        if (!node) return false;
+        
+        currentSum += node.val;
+        
+        // Base case: leaf node
+        if (!node.left && !node.right) {
+            return currentSum === targetSum;
+        }
+        
+        // Take left path or right path
+        return findPath(node.left, currentSum) || 
+               findPath(node.right, currentSum);
+    }
+    
+    return findPath(root, 0);
+}
+
+// 8. Word Break - Take/Non-Take substrings
+function wordBreak(s, wordDict) {
+    const wordSet = new Set(wordDict);
+    
+    function canBreak(index) {
+        // Base case: reached end of string
+        if (index === s.length) return true;
+        
+        // Try taking substrings of different lengths
+        for (let i = index; i < s.length; i++) {
+            const substring = s.slice(index, i + 1);
+            
+            // Take this substring if it's in dictionary
+            if (wordSet.has(substring) && canBreak(i + 1)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    return canBreak(0);
+}
+```
+
+### Recursion with Memoization (Top-Down DP)
+
+**Description:** When recursive solutions have overlapping subproblems, we can optimize them using memoization to store previously computed results.
+
+```javascript
+// Fibonacci with memoization
+function fibonacciMemo(n, memo = new Map()) {
+    if (memo.has(n)) return memo.get(n);
+    
+    if (n <= 1) return n;
+    
+    const result = fibonacciMemo(n - 1, memo) + fibonacciMemo(n - 2, memo);
+    memo.set(n, result);
+    return result;
+}
+
+// 0/1 Knapsack with memoization
+function knapsackMemo(weights, values, capacity) {
+    const memo = new Map();
+    
+    function maxValue(index, remainingCapacity) {
+        const key = `${index}-${remainingCapacity}`;
+        if (memo.has(key)) return memo.get(key);
+        
+        if (index === weights.length || remainingCapacity === 0) {
+            return 0;
+        }
+        
+        let exclude = maxValue(index + 1, remainingCapacity);
+        let include = 0;
+        
+        if (weights[index] <= remainingCapacity) {
+            include = values[index] + maxValue(index + 1, remainingCapacity - weights[index]);
+        }
+        
+        const result = Math.max(include, exclude);
+        memo.set(key, result);
+        return result;
+    }
+    
+    return maxValue(0, capacity);
+}
+
+// Longest Common Subsequence with memoization
+function lcsRecursive(text1, text2) {
+    const memo = new Map();
+    
+    function lcs(i, j) {
+        const key = `${i}-${j}`;
+        if (memo.has(key)) return memo.get(key);
+        
+        if (i === text1.length || j === text2.length) {
+            return 0;
+        }
+        
+        let result;
+        if (text1[i] === text2[j]) {
+            result = 1 + lcs(i + 1, j + 1);
+        } else {
+            result = Math.max(lcs(i + 1, j), lcs(i, j + 1));
+        }
+        
+        memo.set(key, result);
+        return result;
+    }
+    
+    return lcs(0, 0);
+}
+```
+
+### Advanced Recursion Patterns
+
+```javascript
+// 1. Multiple choices at each step - Climbing Stairs variants
+function climbStairsVariants(n, steps = [1, 2]) {
+    function countWays(remaining) {
+        if (remaining === 0) return 1;
+        if (remaining < 0) return 0;
+        
+        let totalWays = 0;
+        for (const step of steps) {
+            totalWays += countWays(remaining - step);
+        }
+        return totalWays;
+    }
+    
+    return countWays(n);
+}
+
+// 2. Tree recursion - Binary Tree paths
+function binaryTreePaths(root) {
+    const result = [];
+    
+    function findPaths(node, currentPath) {
+        if (!node) return;
+        
+        currentPath.push(node.val);
+        
+        // Leaf node - complete path found
+        if (!node.left && !node.right) {
+            result.push(currentPath.join('->'));
+        } else {
+            // Continue exploring left and right
+            findPaths(node.left, currentPath);
+            findPaths(node.right, currentPath);
+        }
+        
+        currentPath.pop(); // backtrack
+    }
+    
+    findPaths(root, []);
+    return result;
+}
+
+// 3. Grid recursion with take/non-take directions
+function uniquePaths(m, n) {
+    function countPaths(row, col) {
+        // Base cases
+        if (row === m - 1 && col === n - 1) return 1;
+        if (row >= m || col >= n) return 0;
+        
+        // Take right move or down move
+        return countPaths(row, col + 1) + countPaths(row + 1, col);
+    }
+    
+    return countPaths(0, 0);
+}
+```
+
+### Recursion Decision Tree Visualization
+
+```
+Example: subsets([1,2,3])
+
+                    []
+                 /      \
+            (take 1)   (don't take 1)
+             [1]           []
+           /     \       /     \
+       [1,2]     [1]   [2]     []
+       /   \     / \   / \     / \
+   [1,2,3][1,2][1,3][1][2,3][2][3][]
+```
+
+### Common Recursion Patterns Summary
+
+| Pattern | When to Use | Time Complexity | Space Complexity |
+|---------|-------------|-----------------|------------------|
+| **Take/Non-Take** | Binary choices, subsets | O(2^n) | O(n) recursion depth |
+| **Multiple Choices** | k choices at each step | O(k^n) | O(n) recursion depth |
+| **Path Exploration** | Tree/graph traversal | O(V+E) or O(2^n) | O(height) or O(n) |
+| **Divide & Conquer** | Problem can be split | O(n log n) typically | O(log n) typically |
+| **Memoized Recursion** | Overlapping subproblems | Depends on subproblems | O(subproblems) |
+
+### Tips for Recursion Problems
+
+1. **Identify the choice:** What decision do you make at each step?
+2. **Define base cases:** When does recursion stop?
+3. **Ensure progress:** Each recursive call should move toward base case
+4. **Consider memoization:** If subproblems overlap, cache results
+5. **Draw the decision tree:** Visualize the recursive calls
+6. **Handle backtracking:** Undo choices when exploring alternatives
+
+## Algorithm Selection Guide
+
+### Problem Pattern Recognition
+
+| Pattern | Algorithm | Example Problems |
+|---------|-----------|------------------|
+| **Subarray/Substring with conditions** | Sliding Window | Max sum subarray, longest substring |
+| **Pairs/Triplets in sorted array** | Two Pointers | Two sum, 3Sum, container with most water |
+| **Search in sorted space** | Binary Search | Search insert position, find peak |
+| **Tree/Graph traversal** | DFS/BFS | Tree traversal, island problems |
+| **Shortest path in unweighted graphs** | BFS | Shortest path, minimum jumps |
+| **Optimization with subproblems** | Dynamic Programming | Coin change, LCS, knapsack |
+| **Generate all solutions** | Backtracking | Permutations, N-Queens, Sudoku |
+| **Local optimal → Global optimal** | Greedy | Activity selection, jump game |
+| **Dynamic connectivity** | Union-Find | Connected components, cycle detection |
+
+### Time Complexity Quick Reference
+
+- **O(1)**: Hash table operations, array access
+- **O(log n)**: Binary search, balanced tree operations
+- **O(n)**: Linear search, single pass algorithms
+- **O(n log n)**: Efficient sorting, divide and conquer
+- **O(n²)**: Nested loops, bubble sort
+- **O(2ⁿ)**: Recursive solutions without memoization
+
+Choose your algorithm based on:
+1. **Input constraints** (size, sorted/unsorted)
+2. **Required time/space complexity**
+3. **Problem pattern** (optimization, search, traversal)
+4. **Output requirements** (all solutions vs optimal)
+
+### 12. Stack Data Structure & Patterns
+
+**Description:** A stack is a linear data structure that follows the Last In, First Out (LIFO) principle. Elements are added and removed from the same end, called the "top" of the stack. Think of it like a stack of plates - you can only add or remove plates from the top.
+
+**Core Concept:** Stack operations are:
+- **Push:** Add element to the top
+- **Pop:** Remove element from the top
+- **Peek/Top:** View the top element without removing it
+- **isEmpty:** Check if stack is empty
+
+**Key Properties:**
+- LIFO (Last In, First Out) access pattern
+- O(1) time complexity for push, pop, and peek operations
+- Memory efficient - only stores elements, no extra pointers needed
+
+**When to use:** Problems involving nested structures, matching patterns, reversing order, function calls, expression evaluation, or when you need to remember the "most recent" item.
+
+**Use cases:** Balanced parentheses, next greater element, histogram problems, browser history, undo operations, expression evaluation, DFS traversal.
+
+```javascript
+// Stack Implementation
+class Stack {
+    constructor() {
+        this.items = [];
+    }
+    
+    push(element) {
+        this.items.push(element);
+    }
+    
+    pop() {
+        if (this.isEmpty()) return null;
+        return this.items.pop();
+    }
+    
+    peek() {
+        if (this.isEmpty()) return null;
+        return this.items[this.items.length - 1];
+    }
+    
+    isEmpty() {
+        return this.items.length === 0;
+    }
+    
+    size() {
+        return this.items.length;
+    }
+}
+
+// 1. Valid Parentheses - Classic Stack Problem
+function isValid(s) {
+    const stack = [];
+    const mapping = { ')': '(', '}': '{', ']': '[' };
+    
+    for (const char of s) {
+        if (char in mapping) {
+            // Closing bracket
+            if (stack.length === 0 || stack.pop() !== mapping[char]) {
+                return false;
+            }
+        } else {
+            // Opening bracket
+            stack.push(char);
+        }
+    }
+    
+    return stack.length === 0;
+}
+
+// 2. Next Greater Element - Monotonic Stack
+function nextGreaterElements(nums) {
+    const result = new Array(nums.length).fill(-1);
+    const stack = []; // Store indices
+    
+    // Process array twice to handle circular nature
+    for (let i = 0; i < 2 * nums.length; i++) {
+        const currIndex = i % nums.length;
+        
+        // Pop elements smaller than current
+        while (stack.length > 0 && nums[stack[stack.length - 1]] < nums[currIndex]) {
+            const index = stack.pop();
+            result[index] = nums[currIndex];
+        }
+        
+        // Only push index in first iteration
+        if (i < nums.length) {
+            stack.push(currIndex);
+        }
+    }
+    
+    return result;
+}
+
+// 3. Largest Rectangle in Histogram - Stack with indices
+function largestRectangleArea(heights) {
+    const stack = [];
+    let maxArea = 0;
+    
+    for (let i = 0; i <= heights.length; i++) {
+        const currentHeight = i === heights.length ? 0 : heights[i];
+        
+        while (stack.length > 0 && heights[stack[stack.length - 1]] > currentHeight) {
+            const height = heights[stack.pop()];
+            const width = stack.length === 0 ? i : i - stack[stack.length - 1] - 1;
+            maxArea = Math.max(maxArea, height * width);
+        }
+        
+        stack.push(i);
+    }
+    
+    return maxArea;
+}
+
+// 4. Daily Temperatures - Monotonic decreasing stack
+function dailyTemperatures(temperatures) {
+    const result = new Array(temperatures.length).fill(0);
+    const stack = []; // Store indices
+    
+    for (let i = 0; i < temperatures.length; i++) {
+        // Pop indices with smaller temperatures
+        while (stack.length > 0 && temperatures[i] > temperatures[stack[stack.length - 1]]) {
+            const index = stack.pop();
+            result[index] = i - index;
+        }
+        stack.push(i);
+    }
+    
+    return result;
+}
+
+// 5. Evaluate Reverse Polish Notation
+function evalRPN(tokens) {
+    const stack = [];
+    const operators = new Set(['+', '-', '*', '/']);
+    
+    for (const token of tokens) {
+        if (operators.has(token)) {
+            const b = stack.pop();
+            const a = stack.pop();
+            
+            switch (token) {
+                case '+': stack.push(a + b); break;
+                case '-': stack.push(a - b); break;
+                case '*': stack.push(a * b); break;
+                case '/': stack.push(Math.trunc(a / b)); break;
+            }
+        } else {
+            stack.push(parseInt(token));
+        }
+    }
+    
+    return stack[0];
+}
+
+// 6. Min Stack - Stack with minimum tracking
+class MinStack {
+    constructor() {
+        this.stack = [];
+        this.minStack = [];
+    }
+    
+    push(val) {
+        this.stack.push(val);
+        // Push to minStack if it's empty or val is <= current minimum
+        if (this.minStack.length === 0 || val <= this.getMin()) {
+            this.minStack.push(val);
+        }
+    }
+    
+    pop() {
+        const popped = this.stack.pop();
+        // Pop from minStack if the popped element was the minimum
+        if (popped === this.getMin()) {
+            this.minStack.pop();
+        }
+        return popped;
+    }
+    
+    top() {
+        return this.stack[this.stack.length - 1];
+    }
+    
+    getMin() {
+        return this.minStack[this.minStack.length - 1];
+    }
+}
+
+// 7. Remove Duplicate Letters - Greedy + Stack
+function removeDuplicateLetters(s) {
+    const stack = [];
+    const inStack = new Set();
+    const lastOccurrence = {};
+    
+    // Record last occurrence of each character
+    for (let i = 0; i < s.length; i++) {
+        lastOccurrence[s[i]] = i;
+    }
+    
+    for (let i = 0; i < s.length; i++) {
+        const char = s[i];
+        
+        if (inStack.has(char)) continue;
+        
+        // Remove characters that are greater than current and appear later
+        while (stack.length > 0 && 
+               stack[stack.length - 1] > char && 
+               lastOccurrence[stack[stack.length - 1]] > i) {
+            const removed = stack.pop();
+            inStack.delete(removed);
+        }
+        
+        stack.push(char);
+        inStack.add(char);
+    }
+    
+    return stack.join('');
+}
+
+// 8. Trapping Rain Water - Stack approach
+function trapRainWater(height) {
+    const stack = [];
+    let waterTrapped = 0;
+    
+    for (let i = 0; i < height.length; i++) {
+        while (stack.length > 0 && height[i] > height[stack[stack.length - 1]]) {
+            const bottom = stack.pop();
+            
+            if (stack.length === 0) break;
+            
+            const distance = i - stack[stack.length - 1] - 1;
+            const boundedHeight = Math.min(height[i], height[stack[stack.length - 1]]) - height[bottom];
+            waterTrapped += distance * boundedHeight;
+        }
+        stack.push(i);
+    }
+    
+    return waterTrapped;
+}
+```
+
+### 13. Queue Data Structure & Patterns
+
+**Description:** A queue is a linear data structure that follows the First In, First Out (FIFO) principle. Elements are added at one end (rear/back) and removed from the other end (front). Think of it like a line of people waiting - the first person in line is the first to be served.
+
+**Core Concept:** Queue operations are:
+- **Enqueue:** Add element to the rear
+- **Dequeue:** Remove element from the front
+- **Front:** View the front element without removing it
+- **isEmpty:** Check if queue is empty
+
+**Key Properties:**
+- FIFO (First In, First Out) access pattern
+- O(1) time complexity for enqueue and dequeue operations
+- Perfect for BFS traversal and level-order processing
+
+**When to use:** Problems involving level-by-level processing, shortest path in unweighted graphs, scheduling, buffering, or when you need to process items in the order they arrive.
+
+**Use cases:** BFS traversal, level order tree traversal, shortest path problems, task scheduling, sliding window maximum, recent calls tracking.
+
+```javascript
+// Queue Implementation using Array
+class Queue {
+    constructor() {
+        this.items = [];
+        this.front = 0;
+    }
+    
+    enqueue(element) {
+        this.items.push(element);
+    }
+    
+    dequeue() {
+        if (this.isEmpty()) return null;
+        const item = this.items[this.front];
+        this.front++;
+        
+        // Reset array when it gets too sparse
+        if (this.front > this.items.length / 2) {
+            this.items = this.items.slice(this.front);
+            this.front = 0;
+        }
+        
+        return item;
+    }
+    
+    peek() {
+        if (this.isEmpty()) return null;
+        return this.items[this.front];
+    }
+    
+    isEmpty() {
+        return this.front >= this.items.length;
+    }
+    
+    size() {
+        return this.items.length - this.front;
+    }
+}
+
+// Circular Queue Implementation
+class CircularQueue {
+    constructor(k) {
+        this.size = k;
+        this.queue = new Array(k);
+        this.front = -1;
+        this.rear = -1;
+        this.count = 0;
+    }
+    
+    enQueue(value) {
+        if (this.isFull()) return false;
+        
+        if (this.isEmpty()) {
+            this.front = 0;
+        }
+        
+        this.rear = (this.rear + 1) % this.size;
+        this.queue[this.rear] = value;
+        this.count++;
+        return true;
+    }
+    
+    deQueue() {
+        if (this.isEmpty()) return false;
+        
+        this.queue[this.front] = null;
+        this.front = (this.front + 1) % this.size;
+        this.count--;
+        
+        if (this.isEmpty()) {
+            this.front = -1;
+            this.rear = -1;
+        }
+        
+        return true;
+    }
+    
+    Front() {
+        return this.isEmpty() ? -1 : this.queue[this.front];
+    }
+    
+    Rear() {
+        return this.isEmpty() ? -1 : this.queue[this.rear];
+    }
+    
+    isEmpty() {
+        return this.count === 0;
+    }
+    
+    isFull() {
+        return this.count === this.size;
+    }
+}
+
+// 1. Binary Tree Level Order Traversal - Classic Queue BFS
+function levelOrder(root) {
+    if (!root) return [];
+    
+    const result = [];
+    const queue = [root];
+    
+    while (queue.length > 0) {
+        const levelSize = queue.length;
+        const currentLevel = [];
+        
+        for (let i = 0; i < levelSize; i++) {
+            const node = queue.shift();
+            currentLevel.push(node.val);
+            
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        
+        result.push(currentLevel);
+    }
+    
+    return result;
+}
+
+// 2. Sliding Window Maximum - Deque approach
+function maxSlidingWindow(nums, k) {
+    const result = [];
+    const deque = []; // Store indices
+    
+    for (let i = 0; i < nums.length; i++) {
+        // Remove indices outside current window
+        while (deque.length > 0 && deque[0] <= i - k) {
+            deque.shift();
+        }
+        
+        // Remove indices of smaller elements
+        while (deque.length > 0 && nums[deque[deque.length - 1]] <= nums[i]) {
+            deque.pop();
+        }
+        
+        deque.push(i);
+        
+        // Add maximum to result when window is complete
+        if (i >= k - 1) {
+            result.push(nums[deque[0]]);
+        }
+    }
+    
+    return result;
+}
+
+// 3. Number of Recent Calls - Queue for time window
+class RecentCounter {
+    constructor() {
+        this.requests = [];
+    }
+    
+    ping(t) {
+        this.requests.push(t);
+        
+        // Remove requests older than t - 3000
+        while (this.requests.length > 0 && this.requests[0] < t - 3000) {
+            this.requests.shift();
+        }
+        
+        return this.requests.length;
+    }
+}
+
+// 4. Shortest Path in Binary Matrix - BFS with Queue
+function shortestPathBinaryMatrix(grid) {
+    const n = grid.length;
+    if (grid[0][0] !== 0 || grid[n-1][n-1] !== 0) return -1;
+    
+    const queue = [[0, 0, 1]]; // [row, col, distance]
+    const visited = new Set(['0,0']);
+    const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
+    
+    while (queue.length > 0) {
+        const [row, col, dist] = queue.shift();
+        
+        if (row === n-1 && col === n-1) return dist;
+        
+        for (const [dr, dc] of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            const key = `${newRow},${newCol}`;
+            
+            if (newRow >= 0 && newRow < n && 
+                newCol >= 0 && newCol < n && 
+                grid[newRow][newCol] === 0 && 
+                !visited.has(key)) {
+                
+                visited.add(key);
+                queue.push([newRow, newCol, dist + 1]);
+            }
+        }
+    }
+    
+    return -1;
+}
+
+// 5. Design Hit Counter - Queue with time window
+class HitCounter {
+    constructor() {
+        this.hits = [];
+    }
+    
+    hit(timestamp) {
+        this.hits.push(timestamp);
+    }
+    
+    getHits(timestamp) {
+        // Remove hits older than 300 seconds
+        while (this.hits.length > 0 && this.hits[0] <= timestamp - 300) {
+            this.hits.shift();
+        }
+        return this.hits.length;
+    }
+}
+
+// 6. Task Scheduler - Priority Queue simulation
+function leastInterval(tasks, n) {
+    const count = {};
+    for (const task of tasks) {
+        count[task] = (count[task] || 0) + 1;
+    }
+    
+    const maxHeap = Object.values(count).sort((a, b) => b - a);
+    const queue = []; // [count, availableTime]
+    let time = 0;
+    
+    while (maxHeap.length > 0 || queue.length > 0) {
+        time++;
+        
+        // Move tasks from queue back to heap if cooldown is over
+        if (queue.length > 0 && queue[0][1] === time) {
+            maxHeap.push(queue.shift()[0]);
+            maxHeap.sort((a, b) => b - a);
+        }
+        
+        if (maxHeap.length > 0) {
+            const currentCount = maxHeap.shift() - 1;
+            if (currentCount > 0) {
+                queue.push([currentCount, time + n + 1]);
+            }
+        }
+    }
+    
+    return time;
+}
+
+// 7. Jump Game VI - Deque optimization
+function maxResult(nums, k) {
+    const n = nums.length;
+    const dp = new Array(n);
+    const deque = []; // Store indices
+    
+    dp[0] = nums[0];
+    deque.push(0);
+    
+    for (let i = 1; i < n; i++) {
+        // Remove indices outside window
+        while (deque.length > 0 && deque[0] < i - k) {
+            deque.shift();
+        }
+        
+        // Current maximum score
+        dp[i] = dp[deque[0]] + nums[i];
+        
+        // Maintain decreasing order in deque
+        while (deque.length > 0 && dp[deque[deque.length - 1]] <= dp[i]) {
+            deque.pop();
+        }
+        
+        deque.push(i);
+    }
+    
+    return dp[n - 1];
+}
+
+// 8. Moving Average from Data Stream - Circular buffer
+class MovingAverage {
+    constructor(size) {
+        this.size = size;
+        this.queue = [];
+        this.sum = 0;
+    }
+    
+    next(val) {
+        this.queue.push(val);
+        this.sum += val;
+        
+        if (this.queue.length > this.size) {
+            this.sum -= this.queue.shift();
+        }
+        
+        return this.sum / this.queue.length;
+    }
+}
+```
+
+### Advanced Stack & Queue Patterns
+
+```javascript
+// Monotonic Stack Pattern - General Template
+function monotonicStack(arr, increasing = true) {
+    const stack = [];
+    const result = [];
+    
+    for (let i = 0; i < arr.length; i++) {
+        while (stack.length > 0 && 
+               (increasing ? stack[stack.length - 1] > arr[i] : stack[stack.length - 1] < arr[i])) {
+            stack.pop();
+        }
+        
+        // Process based on stack state
+        result[i] = stack.length > 0 ? stack[stack.length - 1] : -1;
+        stack.push(arr[i]);
+    }
+    
+    return result;
+}
+
+// Deque (Double-ended Queue) Implementation
+class Deque {
+    constructor() {
+        this.items = [];
+    }
+    
+    addFront(element) {
+        this.items.unshift(element);
+    }
+    
+    addRear(element) {
+        this.items.push(element);
+    }
+    
+    removeFront() {
+        return this.items.shift();
+    }
+    
+    removeRear() {
+        return this.items.pop();
+    }
+    
+    peekFront() {
+        return this.items[0];
+    }
+    
+    peekRear() {
+        return this.items[this.items.length - 1];
+    }
+    
+    isEmpty() {
+        return this.items.length === 0;
+    }
+    
+    size() {
+        return this.items.length;
+    }
+}
+
+// Priority Queue implementation for more complex scenarios
+class PriorityQueue {
+    constructor(compare = (a, b) => a - b) {
+        this.heap = [];
+        this.compare = compare;
+    }
+    
+    parent(i) { return Math.floor((i - 1) / 2); }
+    leftChild(i) { return 2 * i + 1; }
+    rightChild(i) { return 2 * i + 2; }
+    
+    enqueue(item) {
+        this.heap.push(item);
+        this.heapifyUp(this.heap.length - 1);
+    }
+    
+    dequeue() {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop();
+        
+        const root = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this.heapifyDown(0);
+        return root;
+    }
+    
+    heapifyUp(i) {
+        while (i > 0 && this.compare(this.heap[i], this.heap[this.parent(i)]) < 0) {
+            [this.heap[i], this.heap[this.parent(i)]] = [this.heap[this.parent(i)], this.heap[i]];
+            i = this.parent(i);
+        }
+    }
+    
+    heapifyDown(i) {
+        while (this.leftChild(i) < this.heap.length) {
+            let minChild = this.leftChild(i);
+            if (this.rightChild(i) < this.heap.length && 
+                this.compare(this.heap[this.rightChild(i)], this.heap[minChild]) < 0) {
+                minChild = this.rightChild(i);
+            }
+            
+            if (this.compare(this.heap[i], this.heap[minChild]) <= 0) break;
+            
+            [this.heap[i], this.heap[minChild]] = [this.heap[minChild], this.heap[i]];
+            i = minChild;
+        }
+    }
+    
+    peek() {
+        return this.heap.length > 0 ? this.heap[0] : null;
+    }
+    
+    isEmpty() {
+        return this.heap.length === 0;
+    }
+}
+```
+
+### Stack & Queue Pattern Recognition
+
+| Pattern | When to Use | Data Structure | Time Complexity |
+|---------|-------------|---------------|-----------------|
+| **Balanced Parentheses** | Matching nested structures | Stack | O(n) |
+| **Next Greater/Smaller Element** | Finding next larger/smaller | Monotonic Stack | O(n) |
+| **Expression Evaluation** | Parse mathematical expressions | Stack | O(n) |
+| **Function Call Management** | Handle recursive calls | Call Stack | O(depth) |
+| **Undo Operations** | Reverse recent actions | Stack | O(1) per operation |
+| **Level Order Traversal** | Process tree level by level | Queue | O(n) |
+| **Shortest Path (unweighted)** | Find minimum steps | Queue (BFS) | O(V + E) |
+| **Sliding Window Maximum** | Track maximum in window | Deque | O(n) |
+| **Task Scheduling** | Process tasks in order | Queue/Priority Queue | O(n log n) |
+| **Recent Items Tracking** | Keep recent within time window | Queue | O(1) amortized |
+
+### Common Stack & Queue Problem Types
+
+**Stack Problems:**
+- Parentheses validation and generation
+- Next greater/smaller element variations
+- Histogram and rectangle problems
+- Expression evaluation and conversion
+- Monotonic stack applications
+- Browser history and undo/redo
+
+**Queue Problems:**
+- Tree/graph level order traversal
+- Shortest path in unweighted graphs
+- Sliding window problems
+- Task scheduling and rate limiting
+- Stream processing with time windows
+- Cache implementations (LRU with queue component)
