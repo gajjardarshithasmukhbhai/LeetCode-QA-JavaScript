@@ -215,6 +215,44 @@ function removeDuplicates(nums) {
 
 **Use cases:** Maximum subarray sum, longest substring without repeating characters, minimum window substring.
 
+#### Fixed-Size Sliding Window
+
+**Description:** The window size remains constant throughout the algorithm. We slide the window by removing the leftmost element and adding a new rightmost element.
+
+**Key Characteristics:**
+- Window size `k` is predetermined and constant
+- Simple template: calculate initial window, then slide by removing left and adding right
+- Time complexity: O(n), Space complexity: O(1) typically
+- Perfect for problems asking about "subarrays of size k"
+
+**When to use Fixed-Size:**
+- Maximum/minimum sum of k consecutive elements
+- Average of k elements
+- Finding specific patterns in fixed-length subarrays
+- Problems with explicit window size constraint
+
+**Template Pattern:**
+```javascript
+function fixedSlidingWindow(arr, k) {
+    let windowSum = 0;
+    let result = 0;
+    
+    // Calculate sum of first window
+    for (let i = 0; i < k; i++) {
+        windowSum += arr[i];
+    }
+    result = windowSum;
+    
+    // Slide the window
+    for (let i = k; i < arr.length; i++) {
+        windowSum = windowSum - arr[i - k] + arr[i];
+        result = Math.max(result, windowSum); // or any operation
+    }
+    
+    return result;
+}
+```
+
 ```javascript
 // Fixed size sliding window - max sum of k elements
 function maxSumSubarray(nums, k) {
@@ -234,22 +272,342 @@ function maxSumSubarray(nums, k) {
     return maxSum;
 }
 
+// Find all anagrams in string - fixed window size
+function findAnagrams(s, p) {
+    if (s.length < p.length) return [];
+    
+    const result = [];
+    const pCount = new Array(26).fill(0);
+    const windowCount = new Array(26).fill(0);
+    
+    // Count characters in pattern
+    for (const char of p) {
+        pCount[char.charCodeAt(0) - 97]++;
+    }
+    
+    const windowSize = p.length;
+    
+    // Process first window
+    for (let i = 0; i < windowSize; i++) {
+        windowCount[s.charCodeAt(i) - 97]++;
+    }
+    
+    if (arraysEqual(pCount, windowCount)) {
+        result.push(0);
+    }
+    
+    // Slide the window
+    for (let i = windowSize; i < s.length; i++) {
+        // Add new character
+        windowCount[s.charCodeAt(i) - 97]++;
+        // Remove old character
+        windowCount[s.charCodeAt(i - windowSize) - 97]--;
+        
+        if (arraysEqual(pCount, windowCount)) {
+            result.push(i - windowSize + 1);
+        }
+    }
+    
+    return result;
+}
+
+function arraysEqual(arr1, arr2) {
+    return arr1.every((val, index) => val === arr2[index]);
+}
+
+// Maximum average subarray - fixed size
+function findMaxAverage(nums, k) {
+    let sum = 0;
+    
+    // Calculate sum of first k elements
+    for (let i = 0; i < k; i++) {
+        sum += nums[i];
+    }
+    
+    let maxSum = sum;
+    
+    // Slide the window
+    for (let i = k; i < nums.length; i++) {
+        sum = sum - nums[i - k] + nums[i];
+        maxSum = Math.max(maxSum, sum);
+    }
+    
+    return maxSum / k;
+}
+
+// Contains duplicate within k distance - fixed constraint
+function containsNearbyDuplicate(nums, k) {
+    const window = new Set();
+    
+    for (let i = 0; i < nums.length; i++) {
+        // Remove element outside window
+        if (i > k) {
+            window.delete(nums[i - k - 1]);
+        }
+        
+        // Check if current element is in window
+        if (window.has(nums[i])) {
+            return true;
+        }
+        
+        window.add(nums[i]);
+    }
+    
+    return false;
+}
+```
+
+#### Variable-Size Sliding Window
+
+**Description:** The window size changes dynamically based on certain conditions. We expand the window by moving the right pointer and shrink it by moving the left pointer.
+
+**Key Characteristics:**
+- Window size varies based on problem constraints
+- Uses two pointers (left and right) to control window boundaries
+- Expand window when condition is not met, shrink when condition is violated
+- More complex logic but very powerful for optimization problems
+
+**When to use Variable-Size:**
+- Longest/shortest subarray with certain properties
+- Subarray with sum equal to target
+- Substring problems with character constraints
+- Problems asking for "minimum/maximum length"
+
+**Template Patterns:**
+
+**Pattern 1: Find Maximum Length**
+```javascript
+function maxLengthTemplate(arr) {
+    let left = 0, maxLength = 0;
+    let windowState = {}; // or Set, or counter
+    
+    for (let right = 0; right < arr.length; right++) {
+        // Add arr[right] to window
+        updateWindowState(windowState, arr[right]);
+        
+        // Shrink window while condition is violated
+        while (isConditionViolated(windowState)) {
+            removeFromWindow(windowState, arr[left]);
+            left++;
+        }
+        
+        // Update result
+        maxLength = Math.max(maxLength, right - left + 1);
+    }
+    
+    return maxLength;
+}
+```
+
+**Pattern 2: Find Minimum Length**
+```javascript
+function minLengthTemplate(arr, target) {
+    let left = 0, minLength = Infinity;
+    let windowState = 0; // or appropriate state
+    
+    for (let right = 0; right < arr.length; right++) {
+        // Add arr[right] to window
+        windowState += arr[right];
+        
+        // Shrink window while condition is satisfied
+        while (isConditionSatisfied(windowState, target)) {
+            minLength = Math.min(minLength, right - left + 1);
+            windowState -= arr[left];
+            left++;
+        }
+    }
+    
+    return minLength === Infinity ? 0 : minLength;
+}
+```
+
+```javascript
 // Variable size sliding window - longest substring without repeating chars
 function lengthOfLongestSubstring(s) {
     const seen = new Set();
     let left = 0, maxLength = 0;
     
     for (let right = 0; right < s.length; right++) {
+        // Shrink window while we have duplicates
         while (seen.has(s[right])) {
             seen.delete(s[left]);
             left++;
         }
+        
         seen.add(s[right]);
         maxLength = Math.max(maxLength, right - left + 1);
     }
     return maxLength;
 }
+
+// Minimum window substring - variable size
+function minWindow(s, t) {
+    if (s.length < t.length) return "";
+    
+    const tCount = {};
+    for (const char of t) {
+        tCount[char] = (tCount[char] || 0) + 1;
+    }
+    
+    let left = 0, minLen = Infinity, minStart = 0;
+    let required = Object.keys(tCount).length;
+    let formed = 0;
+    const windowCount = {};
+    
+    for (let right = 0; right < s.length; right++) {
+        // Add character to window
+        const char = s[right];
+        windowCount[char] = (windowCount[char] || 0) + 1;
+        
+        if (tCount[char] && windowCount[char] === tCount[char]) {
+            formed++;
+        }
+        
+        // Shrink window while it's valid
+        while (left <= right && formed === required) {
+            // Update result if this window is smaller
+            if (right - left + 1 < minLen) {
+                minLen = right - left + 1;
+                minStart = left;
+            }
+            
+            // Remove leftmost character
+            const leftChar = s[left];
+            windowCount[leftChar]--;
+            if (tCount[leftChar] && windowCount[leftChar] < tCount[leftChar]) {
+                formed--;
+            }
+            left++;
+        }
+    }
+    
+    return minLen === Infinity ? "" : s.substring(minStart, minStart + minLen);
+}
+
+// Longest substring with at most k distinct characters
+function lengthOfLongestSubstringKDistinct(s, k) {
+    if (k === 0) return 0;
+    
+    const charCount = new Map();
+    let left = 0, maxLength = 0;
+    
+    for (let right = 0; right < s.length; right++) {
+        // Add character to window
+        const rightChar = s[right];
+        charCount.set(rightChar, (charCount.get(rightChar) || 0) + 1);
+        
+        // Shrink window while we have more than k distinct characters
+        while (charCount.size > k) {
+            const leftChar = s[left];
+            charCount.set(leftChar, charCount.get(leftChar) - 1);
+            if (charCount.get(leftChar) === 0) {
+                charCount.delete(leftChar);
+            }
+            left++;
+        }
+        
+        maxLength = Math.max(maxLength, right - left + 1);
+    }
+    
+    return maxLength;
+}
+
+// Subarray sum equals k - variable size with frequency map
+function subarraySum(nums, k) {
+    let count = 0;
+    let sum = 0;
+    const sumFreq = new Map();
+    sumFreq.set(0, 1); // Important: empty subarray
+    
+    for (const num of nums) {
+        sum += num;
+        
+        // Check if (sum - k) exists
+        if (sumFreq.has(sum - k)) {
+            count += sumFreq.get(sum - k);
+        }
+        
+        // Update frequency of current sum
+        sumFreq.set(sum, (sumFreq.get(sum) || 0) + 1);
+    }
+    
+    return count;
+}
+
+// Minimum size subarray sum - variable size shrinking
+function minSubArrayLen(target, nums) {
+    let left = 0, minLength = Infinity;
+    let windowSum = 0;
+    
+    for (let right = 0; right < nums.length; right++) {
+        windowSum += nums[right];
+        
+        // Shrink window while sum >= target
+        while (windowSum >= target) {
+            minLength = Math.min(minLength, right - left + 1);
+            windowSum -= nums[left];
+            left++;
+        }
+    }
+    
+    return minLength === Infinity ? 0 : minLength;
+}
+
+// Fruits into baskets - variable size with constraint
+function totalFruit(fruits) {
+    const basketCount = new Map();
+    let left = 0, maxFruits = 0;
+    
+    for (let right = 0; right < fruits.length; right++) {
+        // Add fruit to basket
+        const fruit = fruits[right];
+        basketCount.set(fruit, (basketCount.get(fruit) || 0) + 1);
+        
+        // Shrink window while we have more than 2 types
+        while (basketCount.size > 2) {
+            const leftFruit = fruits[left];
+            basketCount.set(leftFruit, basketCount.get(leftFruit) - 1);
+            if (basketCount.get(leftFruit) === 0) {
+                basketCount.delete(leftFruit);
+            }
+            left++;
+        }
+        
+        maxFruits = Math.max(maxFruits, right - left + 1);
+    }
+    
+    return maxFruits;
+}
 ```
+
+#### Sliding Window Problem Recognition Guide
+
+| Problem Type | Window Type | Key Indicators | Template |
+|--------------|-------------|----------------|----------|
+| **Fixed Size Problems** | Fixed | "subarray of size k", "k consecutive elements" | Expand to k, then slide |
+| **Longest Valid Substring** | Variable | "longest substring with...", maximize length | Expand right, shrink left when invalid |
+| **Shortest Valid Substring** | Variable | "minimum window", "shortest subarray" | Expand right, shrink left when valid |
+| **Subarray Sum Problems** | Variable | "sum equals k", "sum >= target" | Track running sum, use prefix sums |
+| **Character/Element Constraints** | Variable | "at most k distinct", "without repeating" | Use frequency map/set |
+
+#### Advanced Sliding Window Insights
+
+**Fixed-Size Window Optimizations:**
+- Use circular buffer for space optimization
+- Precompute expensive operations for the initial window
+- Consider bit manipulation for character problems
+
+**Variable-Size Window Optimizations:**
+- Use frequency maps instead of sets when possible
+- Consider prefix sums for range sum queries
+- Implement lazy propagation for complex state updates
+
+**Common Pitfalls:**
+- Forgetting to handle edge cases (empty arrays, k > array length)
+- Not properly maintaining window state during shrinking
+- Off-by-one errors in window boundaries
+- Not considering the case where no valid window exists
+
 
 ### 3. Binary Search
 
