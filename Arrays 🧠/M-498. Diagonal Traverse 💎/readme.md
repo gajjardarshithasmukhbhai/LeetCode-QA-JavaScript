@@ -47,6 +47,43 @@ See [`index.js`](./index.js) for implementation.
 
 ---
 
+### Alternate Technique: Group by `i - j` (Anti-Diagonal Traversal)
+- Each element at position `(i, j)` belongs to the anti-diagonal with key `i - j`.
+- Store elements of each anti-diagonal in a map with key `i - j`.
+
+#### Traversal Order
+- For each anti-diagonal:
+  - If the anti-diagonal index is even, append elements as is.
+  - If the anti-diagonal index is odd, reverse the elements before appending.
+
+#### Steps
+1. Iterate through the matrix and group elements by `i - j`.
+2. Traverse the anti-diagonals in order, reversing as needed.
+3. Collect the result.
+
+#### Example
+
+Input:
+```
+[[1,2,3],
+ [4,5,6],
+ [7,8,9]]
+```
+
+Grouping by `i - j`:
+- Key 0: [1,5,9]
+- Key -1: [2,6]
+- Key 1: [4,8]
+- Key -2: [3]
+- Key 2: [7]
+
+Output (one possible anti-diagonal order):
+```
+[1,5,9,2,6,4,8,3,7]
+```
+
+---
+
 ## General Strategy for Matrix Traversal Problems
 
 Matrix traversal problems often require visiting elements in a specific order (row-wise, column-wise, diagonal, spiral, zigzag, etc.). Here are steps and tips to solve any such problem:
