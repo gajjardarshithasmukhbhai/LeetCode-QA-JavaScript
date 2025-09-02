@@ -2226,7 +2226,7 @@ class PriorityQueue {
 - Cache implementations (LRU with queue component)
 
 
-### 13. Heap
+### 14. Heap
 
 ## Description
 A heap is a complete binary tree that satisfies the heap property. In a min-heap, every parent node is smaller than or equal to its children. This data structure is efficiently implemented using an array where for any element at index `i`:
@@ -2238,85 +2238,84 @@ The heap maintains its property through two key operations: heapifyUp (bubble up
 
 ## Implementation
 ```javascript
-class MinHeap {
-    constructor() {
-        this.heap = []; // Array to store heap elements
-    }
+// MinHeap implementation using functional approach
+function createMinHeap() {
+    const heap = []; // Array to store heap elements
     
     // Calculate parent index for any given index
     // Parent of node at index i is at (i-1)/2
-    getParentIndex(index) {
-        return Math.floor((index - 1) / 2);
-    }
+    const getParentIndex = (index) => Math.floor((index - 1) / 2);
     
     // Calculate left child index
     // Left child of node at index i is at 2*i + 1
-    getLeftChildIndex(index) {
-        return 2 * index + 1;
-    }
+    const getLeftChildIndex = (index) => 2 * index + 1;
     
     // Calculate right child index  
     // Right child of node at index i is at 2*i + 2
-    getRightChildIndex(index) {
-        return 2 * index + 2;
-    }
-    
-    insert(value) {
-        // Step 1: Add new element at the end of array
-        this.heap.push(value);
-        // Step 2: Restore heap property by moving element up if needed
-        this.heapifyUp(this.heap.length - 1);
-    }
-    
-    extractMin() {
-        // Handle edge cases
-        if (this.heap.length === 0) return null;
-        if (this.heap.length === 1) return this.heap.pop();
-        
-        // Step 1: Store minimum element (root) to return
-        const min = this.heap[0];
-        // Step 2: Move last element to root position
-        this.heap[0] = this.heap.pop();
-        // Step 3: Restore heap property by moving root down if needed
-        this.heapifyDown(0);
-        return min;
-    }
+    const getRightChildIndex = (index) => 2 * index + 2;
     
     // Move element up the tree until heap property is satisfied
-    heapifyUp(index) {
-        const parentIndex = this.getParentIndex(index);
+    const heapifyUp = (index) => {
+        const parentIndex = getParentIndex(index);
         // If we haven't reached root AND parent is greater than current
-        if (parentIndex >= 0 && this.heap[parentIndex] > this.heap[index]) {
+        if (parentIndex >= 0 && heap[parentIndex] > heap[index]) {
             // Swap current element with its parent
-            [this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]];
+            [heap[parentIndex], heap[index]] = [heap[index], heap[parentIndex]];
             // Recursively check the parent level
-            this.heapifyUp(parentIndex);
+            heapifyUp(parentIndex);
         }
-    }
+    };
     
     // Move element down the tree until heap property is satisfied
-    heapifyDown(index) {
-        const leftIndex = this.getLeftChildIndex(index);
-        const rightIndex = this.getRightChildIndex(index);
+    const heapifyDown = (index) => {
+        const leftIndex = getLeftChildIndex(index);
+        const rightIndex = getRightChildIndex(index);
         let smallest = index; // Assume current is smallest
         
         // Check if left child exists and is smaller than current smallest
-        if (leftIndex < this.heap.length && this.heap[leftIndex] < this.heap[smallest]) {
+        if (leftIndex < heap.length && heap[leftIndex] < heap[smallest]) {
             smallest = leftIndex;
         }
         
         // Check if right child exists and is smaller than current smallest
-        if (rightIndex < this.heap.length && this.heap[rightIndex] < this.heap[smallest]) {
+        if (rightIndex < heap.length && heap[rightIndex] < heap[smallest]) {
             smallest = rightIndex;
         }
         
         // If smallest is not the current index, we need to swap and continue
         if (smallest !== index) {
-            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            [heap[index], heap[smallest]] = [heap[smallest], heap[index]];
             // Recursively heapify the affected subtree
-            this.heapifyDown(smallest);
+            heapifyDown(smallest);
         }
-    }
+    };
+    
+    return {
+        // Step 1: Add new element at the end of array
+        // Step 2: Restore heap property by moving element up if needed
+        insert: (value) => {
+            heap.push(value);
+            heapifyUp(heap.length - 1);
+        },
+        
+        extractMin: () => {
+            // Handle edge cases
+            if (heap.length === 0) return null;
+            if (heap.length === 1) return heap.pop();
+            
+            // Step 1: Store minimum element (root) to return
+            const min = heap[0];
+            // Step 2: Move last element to root position
+            heap[0] = heap.pop();
+            // Step 3: Restore heap property by moving root down if needed
+            heapifyDown(0);
+            return min;
+        },
+        
+        peek: () => heap.length > 0 ? heap[0] : null,
+        size: () => heap.length,
+        isEmpty: () => heap.length === 0
+    };
 }
 ```
 
@@ -2324,6 +2323,21 @@ class MinHeap {
 - **Time Complexity**: Insert/Delete: O(log n), Peek: O(1)
 - **Space Complexity**: O(n)
 - **Use Cases**: Priority queues, finding k largest/smallest elements
+
+## When to Use
+- When you need to repeatedly find the minimum or maximum element
+- When implementing priority queues or schedulers
+- When you need to maintain a sorted order with frequent insertions/deletions
+- When solving problems involving "top K" elements
+- When you need to merge multiple sorted sequences efficiently
+
+## Use Cases
+1. **Priority Queue Systems**: Task scheduling, process management
+2. **Graph Algorithms**: Dijkstra's shortest path, Prim's MST
+3. **Data Stream Processing**: Finding median, top K frequent elements
+4. **Memory Management**: Garbage collection algorithms
+5. **Load Balancing**: Distributing tasks based on priority
+6. **Real-time Systems**: Event scheduling, deadline management
 
 ## LeetCode Examples
 - **215. Kth Largest Element in an Array** - Use min heap to find kth largest
@@ -2334,7 +2348,7 @@ class MinHeap {
 
 ### 14.Segment Tree
 
-### Description
+## Description
 A segment tree is a binary tree data structure used for storing intervals or segments. It allows querying which segments contain a given point efficiently. Each node in the tree represents a range/segment of the original array, and stores aggregate information (like sum, min, max) about that range.
 
 The tree structure:
@@ -2345,75 +2359,73 @@ The tree structure:
 
 ## Implementation
 ```javascript
-class SegmentTree {
-    constructor(arr) {
-        this.n = arr.length; // Store original array size
-        // Allocate 4*n space for segment tree (worst case for complete binary tree)
-        this.tree = new Array(4 * this.n);
-        // Build the tree starting from root node (index 0)
-        this.build(arr, 0, 0, this.n - 1);
-    }
+// Segment Tree implementation using functional approach
+function createSegmentTree(arr) {
+    const n = arr.length; // Store original array size
+    // Allocate 4*n space for segment tree (worst case for complete binary tree)
+    const tree = new Array(4 * n);
     
     // Recursively build the segment tree
-    build(arr, node, start, end) {
+    const build = (node, start, end) => {
         if (start === end) {
             // Leaf node: store the array element directly
-            this.tree[node] = arr[start];
+            tree[node] = arr[start];
         } else {
             // Internal node: merge children's values
             const mid = Math.floor((start + end) / 2);
             // Build left subtree (range: start to mid)
-            this.build(arr, 2 * node + 1, start, mid);
+            build(2 * node + 1, start, mid);
             // Build right subtree (range: mid+1 to end)
-            this.build(arr, 2 * node + 2, mid + 1, end);
+            build(2 * node + 2, mid + 1, end);
             // Current node stores sum of its children (can be min, max, etc.)
-            this.tree[node] = this.tree[2 * node + 1] + this.tree[2 * node + 2];
+            tree[node] = tree[2 * node + 1] + tree[2 * node + 2];
         }
-    }
+    };
     
     // Update value at specific index
-    update(node, start, end, idx, val) {
+    const update = (node, start, end, idx, val) => {
         if (start === end) {
             // Reached the leaf node corresponding to idx
-            this.tree[node] = val;
+            tree[node] = val;
         } else {
             const mid = Math.floor((start + end) / 2);
             if (idx <= mid) {
                 // Target index is in left subtree
-                this.update(2 * node + 1, start, mid, idx, val);
+                update(2 * node + 1, start, mid, idx, val);
             } else {
                 // Target index is in right subtree
-                this.update(2 * node + 2, mid + 1, end, idx, val);
+                update(2 * node + 2, mid + 1, end, idx, val);
             }
             // After updating child, update current node's value
-            this.tree[node] = this.tree[2 * node + 1] + this.tree[2 * node + 2];
+            tree[node] = tree[2 * node + 1] + tree[2 * node + 2];
         }
-    }
+    };
     
     // Query sum in range [l, r]
-    query(node, start, end, l, r) {
+    const query = (node, start, end, l, r) => {
         // Case 1: Range is completely outside the node's range
         if (r < start || end < l) return 0;
         
         // Case 2: Node's range is completely inside query range
-        if (l <= start && end <= r) return this.tree[node];
+        if (l <= start && end <= r) return tree[node];
         
         // Case 3: Partial overlap - need to check both children
         const mid = Math.floor((start + end) / 2);
         // Get sum from left child + sum from right child
-        return this.query(2 * node + 1, start, mid, l, r) + 
-               this.query(2 * node + 2, mid + 1, end, l, r);
-    }
+        return query(2 * node + 1, start, mid, l, r) + 
+               query(2 * node + 2, mid + 1, end, l, r);
+    };
     
-    // Public method to query range [l, r]
-    rangeQuery(l, r) {
-        return this.query(0, 0, this.n - 1, l, r);
-    }
+    // Build the tree starting from root node (index 0)
+    build(0, 0, n - 1);
     
-    // Public method to update value at index idx
-    updateValue(idx, val) {
-        this.update(0, 0, this.n - 1, idx, val);
-    }
+    return {
+        // Public method to query range [l, r]
+        rangeQuery: (l, r) => query(0, 0, n - 1, l, r),
+        
+        // Public method to update value at index idx
+        updateValue: (idx, val) => update(0, 0, n - 1, idx, val)
+    };
 }
 ```
 
@@ -2421,6 +2433,21 @@ class SegmentTree {
 - **Time Complexity**: Build: O(n), Query/Update: O(log n)
 - **Space Complexity**: O(n)
 - **Use Cases**: Range sum queries, range minimum/maximum queries
+
+## When to Use
+- When you have frequent range queries (sum, min, max) on an array
+- When you need both range queries and point updates efficiently
+- When dealing with immutable arrays with range operations
+- When you need to support lazy propagation for range updates
+- When working with interval-based problems
+
+## Use Cases
+1. **Database Systems**: Range queries on indexed data
+2. **Computational Geometry**: Range minimum/maximum queries
+3. **Game Development**: Collision detection, spatial queries
+4. **Financial Systems**: Stock price range analysis
+5. **Image Processing**: Rectangle sum queries on pixel matrices
+6. **Network Monitoring**: Bandwidth usage analysis over time ranges
 
 ## LeetCode Examples
 - **307. Range Sum Query - Mutable** - Direct segment tree application
@@ -2442,105 +2469,110 @@ Key characteristics:
 
 ## Implementation
 ```javascript
-// Node structure: contains data and reference to next node
-class ListNode {
-    constructor(val = 0, next = null) {
-        this.val = val;   // Data stored in the node
-        this.next = next; // Reference to the next node
-    }
+// Node creation function: contains data and reference to next node
+function createListNode(val = 0, next = null) {
+    return {
+        val,   // Data stored in the node
+        next   // Reference to the next node
+    };
 }
 
-class LinkedList {
-    constructor() {
-        this.head = null; // Reference to the first node
-        this.size = 0;    // Track the number of elements
-    }
+// LinkedList implementation using functional approach
+function createLinkedList() {
+    let head = null; // Reference to the first node
+    let size = 0;    // Track the number of elements
     
-    // Add element to the beginning of the list
-    prepend(val) {
-        // Create new node with current head as its next
-        const newNode = new ListNode(val, this.head);
-        // Update head to point to new node
-        this.head = newNode;
-        this.size++;
-    }
-    
-    // Add element to the end of the list
-    append(val) {
-        const newNode = new ListNode(val);
+    return {
+        // Add element to the beginning of the list
+        prepend: (val) => {
+            // Create new node with current head as its next
+            const newNode = createListNode(val, head);
+            // Update head to point to new node
+            head = newNode;
+            size++;
+        },
         
-        if (!this.head) {
-            // If list is empty, new node becomes head
-            this.head = newNode;
-        } else {
-            // Traverse to the end of the list
-            let current = this.head;
-            while (current.next) {
+        // Add element to the end of the list
+        append: (val) => {
+            const newNode = createListNode(val);
+            
+            if (!head) {
+                // If list is empty, new node becomes head
+                head = newNode;
+            } else {
+                // Traverse to the end of the list
+                let current = head;
+                while (current.next) {
+                    current = current.next;
+                }
+                // Link the last node to new node
+                current.next = newNode;
+            }
+            size++;
+        },
+        
+        // Remove first occurrence of value
+        remove: (val) => {
+            if (!head) return false; // Empty list
+            
+            // If head node contains the value to remove
+            if (head.val === val) {
+                head = head.next; // Move head to next node
+                size--;
+                return true;
+            }
+            
+            // Search for the node to remove
+            let current = head;
+            while (current.next && current.next.val !== val) {
                 current = current.next;
             }
-            // Link the last node to new node
-            current.next = newNode;
-        }
-        this.size++;
-    }
-    
-    // Remove first occurrence of value
-    remove(val) {
-        if (!this.head) return false; // Empty list
-        
-        // If head node contains the value to remove
-        if (this.head.val === val) {
-            this.head = this.head.next; // Move head to next node
-            this.size--;
-            return true;
-        }
-        
-        // Search for the node to remove
-        let current = this.head;
-        while (current.next && current.next.val !== val) {
-            current = current.next;
-        }
-        
-        // If found, skip the node by updating links
-        if (current.next) {
-            current.next = current.next.next;
-            this.size--;
-            return true;
-        }
-        return false; // Value not found
-    }
-    
-    // Reverse the entire linked list
-    reverse() {
-        let prev = null;    // Previous node (starts as null)
-        let current = this.head; // Current node being processed
-        
-        while (current) {
-            const next = current.next; // Store next node before breaking link
-            current.next = prev;       // Reverse the link
-            prev = current;            // Move prev forward
-            current = next;            // Move current forward
-        }
-        
-        // Update head to the new first node (previously last)
-        this.head = prev;
-        return this.head;
-    }
-    
-    // Detect if there's a cycle in the list using Floyd's algorithm
-    hasCycle() {
-        let slow = this.head; // Moves one step at a time
-        let fast = this.head; // Moves two steps at a time
-        
-        while (fast && fast.next) {
-            slow = slow.next;      // Move slow pointer one step
-            fast = fast.next.next; // Move fast pointer two steps
             
-            // If they meet, there's a cycle
-            if (slow === fast) return true;
-        }
-        return false; // Fast pointer reached end, no cycle
-    }
+            // If found, skip the node by updating links
+            if (current.next) {
+                current.next = current.next.next;
+                size--;
+                return true;
+            }
+            return false; // Value not found
+        },
+        
+        // Reverse the entire linked list
+        reverse: () => {
+            let prev = null;    // Previous node (starts as null)
+            let current = head; // Current node being processed
+            
+            while (current) {
+                const next = current.next; // Store next node before breaking link
+                current.next = prev;       // Reverse the link
+                prev = current;            // Move prev forward
+                current = next;            // Move current forward
+            }
+            
+            // Update head to the new first node (previously last)
+            head = prev;
+            return head;
+        },
+        
+        // Detect if there's a cycle in the list using Floyd's algorithm
+        hasCycle: () => {
+            let slow = head; // Moves one step at a time
+            let fast = head; // Moves two steps at a time
+            
+            while (fast && fast.next) {
+                slow = slow.next;      // Move slow pointer one step
+                fast = fast.next.next; // Move fast pointer two steps
+                
+                // If they meet, there's a cycle
+                if (slow === fast) return true;
+            }
+            return false; // Fast pointer reached end, no cycle
+        },
+        
+        getHead: () => head,
+        getSize: () => size,
+        isEmpty: () => size === 0
+    };
 }
 ```
 
@@ -2548,6 +2580,21 @@ class LinkedList {
 - **Time Complexity**: Access: O(n), Insert/Delete: O(1) if position known
 - **Space Complexity**: O(1) for operations, O(n) for storage
 - **Use Cases**: Dynamic size requirements, frequent insertions/deletions
+
+## When to Use
+- When you don't know the size of data in advance
+- When you need frequent insertions/deletions at arbitrary positions
+- When memory allocation needs to be dynamic
+- When you don't need random access to elements
+- When implementing other data structures (stacks, queues)
+
+## Use Cases
+1. **Undo/Redo Operations**: Text editors, image editing software
+2. **Music/Video Playlists**: Next/previous song functionality
+3. **Browser History**: Forward/backward navigation
+4. **Memory Management**: Free memory block tracking
+5. **Sparse Data Structures**: Representing sparse matrices
+6. **Real-time Systems**: Dynamic task queues
 
 ## LeetCode Examples
 - **206. Reverse Linked List** - Basic reversal technique
@@ -2572,86 +2619,116 @@ Key concepts:
 
 ## Common Operations
 ```javascript
-class BitManipulation {
-    // Check if the bit at position 'pos' is set (1) or not (0)
-    static isBitSet(num, pos) {
-        // Create a mask with only the pos-th bit set: 1 << pos
-        // AND with num: if bit is set, result is non-zero
-        return (num & (1 << pos)) !== 0;
+// Bit manipulation functions using functional approach
+
+// Check if the bit at position 'pos' is set (1) or not (0)
+const isBitSet = (num, pos) => {
+    // Create a mask with only the pos-th bit set: 1 << pos
+    // AND with num: if bit is set, result is non-zero
+    return (num & (1 << pos)) !== 0;
+};
+
+// Set the bit at position 'pos' to 1
+const setBit = (num, pos) => {
+    // Create mask with pos-th bit set, OR with num
+    // OR operation: 0|1=1, 1|1=1 (sets bit without affecting others)
+    return num | (1 << pos);
+};
+
+// Clear the bit at position 'pos' (set to 0)
+const clearBit = (num, pos) => {
+    // Create mask with all bits 1 except pos-th bit (using NOT)
+    // AND with num: 0&anything=0, 1&1=1 (clears only target bit)
+    return num & ~(1 << pos);
+};
+
+// Toggle the bit at position 'pos' (0→1, 1→0)
+const toggleBit = (num, pos) => {
+    // XOR with mask: 0^1=1, 1^1=0 (flips only the target bit)
+    return num ^ (1 << pos);
+};
+
+// Count number of set bits (1s) in the number
+const countSetBits = (num) => {
+    let count = 0;
+    while (num) {
+        count += num & 1; // Check if least significant bit is 1
+        num >>= 1;        // Right shift to check next bit
     }
+    return count;
+};
+
+// Check if number is a power of 2
+const isPowerOfTwo = (num) => {
+    // Powers of 2 have exactly one bit set
+    // num & (num-1) clears the rightmost set bit
+    // If only one bit was set, result becomes 0
+    return num > 0 && (num & (num - 1)) === 0;
+};
+
+// Find the single number that appears once (others appear twice)
+const singleNumber = (nums) => {
+    // XOR property: a^a=0, a^0=a
+    // XORing all numbers cancels out duplicates, leaves single number
+    return nums.reduce((result, num) => result ^ num, 0);
+};
+
+// Generate all possible subsets using bit masking
+const getAllSubsets = (nums) => {
+    const result = [];
+    const n = nums.length;
     
-    // Set the bit at position 'pos' to 1
-    static setBit(num, pos) {
-        // Create mask with pos-th bit set, OR with num
-        // OR operation: 0|1=1, 1|1=1 (sets bit without affecting others)
-        return num | (1 << pos);
-    }
-    
-    // Clear the bit at position 'pos' (set to 0)
-    static clearBit(num, pos) {
-        // Create mask with all bits 1 except pos-th bit (using NOT)
-        // AND with num: 0&anything=0, 1&1=1 (clears only target bit)
-        return num & ~(1 << pos);
-    }
-    
-    // Toggle the bit at position 'pos' (0→1, 1→0)
-    static toggleBit(num, pos) {
-        // XOR with mask: 0^1=1, 1^1=0 (flips only the target bit)
-        return num ^ (1 << pos);
-    }
-    
-    // Count number of set bits (1s) in the number
-    static countSetBits(num) {
-        let count = 0;
-        while (num) {
-            count += num & 1; // Check if least significant bit is 1
-            num >>= 1;        // Right shift to check next bit
-        }
-        return count;
-    }
-    
-    // Check if number is a power of 2
-    static isPowerOfTwo(num) {
-        // Powers of 2 have exactly one bit set
-        // num & (num-1) clears the rightmost set bit
-        // If only one bit was set, result becomes 0
-        return num > 0 && (num & (num - 1)) === 0;
-    }
-    
-    // Find the single number that appears once (others appear twice)
-    static singleNumber(nums) {
-        // XOR property: a^a=0, a^0=a
-        // XORing all numbers cancels out duplicates, leaves single number
-        return nums.reduce((result, num) => result ^ num, 0);
-    }
-    
-    // Generate all possible subsets using bit masking
-    static getAllSubsets(nums) {
-        const result = [];
-        const n = nums.length;
-        
-        // Generate all numbers from 0 to 2^n - 1
-        // Each number represents a subset (bit pattern)
-        for (let i = 0; i < (1 << n); i++) {
-            const subset = [];
-            // Check each bit position
-            for (let j = 0; j < n; j++) {
-                // If j-th bit is set in i, include nums[j] in subset
-                if (i & (1 << j)) {
-                    subset.push(nums[j]);
-                }
+    // Generate all numbers from 0 to 2^n - 1
+    // Each number represents a subset (bit pattern)
+    for (let i = 0; i < (1 << n); i++) {
+        const subset = [];
+        // Check each bit position
+        for (let j = 0; j < n; j++) {
+            // If j-th bit is set in i, include nums[j] in subset
+            if (i & (1 << j)) {
+                subset.push(nums[j]);
             }
-            result.push(subset);
         }
-        return result;
+        result.push(subset);
     }
-}
+    return result;
+};
+
+// Create bit manipulation utilities object
+const createBitManipulation = () => ({
+    isBitSet,
+    setBit,
+    clearBit,
+    toggleBit,
+    countSetBits,
+    isPowerOfTwo,
+    singleNumber,
+    getAllSubsets
+});
 ```
 
 ## Insights
 - **Time Complexity**: Most operations O(1), counting bits O(log n)
 - **Space Complexity**: O(1) for basic operations
 - **Use Cases**: Efficient storage, fast operations, subset generation
+
+## When to Use
+- When you need extremely fast operations on integers
+- When working with binary representations or flags
+- When memory usage needs to be minimized
+- When dealing with subset generation problems
+- When implementing low-level optimizations
+- When working with permissions or state management
+
+## Use Cases
+1. **Permission Systems**: User roles, file permissions (read/write/execute)
+2. **Game Development**: Player states, item flags, collision masks
+3. **Cryptography**: Hash functions, encryption algorithms
+4. **Compiler Design**: Symbol tables, optimization flags
+5. **Database Systems**: Bloom filters, bitmap indexes
+6. **Network Programming**: IP address manipulation, protocol flags
+7. **Graphics Programming**: Color manipulation, pixel operations
+8. **Embedded Systems**: Hardware register manipulation
 
 ## LeetCode Examples
 - **136. Single Number** - XOR to find unique element
@@ -2675,58 +2752,59 @@ This works because:
 
 ## Implementation
 ```javascript
-class PrefixSum {
-    constructor(nums) {
-        // Build prefix sum array with extra element at start
-        this.prefixSum = [0]; // prefixSum[0] = 0 for easier calculation
-        
-        // Calculate cumulative sum: prefixSum[i] = sum of first i elements
-        for (let i = 0; i < nums.length; i++) {
-            this.prefixSum.push(this.prefixSum[this.prefixSum.length - 1] + nums[i]);
+// Prefix Sum implementation using functional approach
+function createPrefixSum(nums) {
+    // Build prefix sum array with extra element at start
+    const prefixSum = [0]; // prefixSum[0] = 0 for easier calculation
+    
+    // Calculate cumulative sum: prefixSum[i] = sum of first i elements
+    for (let i = 0; i < nums.length; i++) {
+        prefixSum.push(prefixSum[prefixSum.length - 1] + nums[i]);
+    }
+    
+    return {
+        // Get sum of elements from index left to right (inclusive)
+        rangeSum: (left, right) => {
+            // Sum from left to right = prefixSum[right+1] - prefixSum[left]
+            // This gives: (sum 0 to right) - (sum 0 to left-1) = sum left to right
+            return prefixSum[right + 1] - prefixSum[left];
+        }
+    };
+}
+
+// 2D Prefix Sum for matrix range queries using functional approach
+function createPrefixSum2D(matrix) {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    // Create 2D prefix sum array with extra row and column
+    const prefixSum = Array(rows + 1).fill().map(() => Array(cols + 1).fill(0));
+    
+    // Build 2D prefix sum using inclusion-exclusion principle
+    for (let i = 1; i <= rows; i++) {
+        for (let j = 1; j <= cols; j++) {
+            prefixSum[i][j] = matrix[i-1][j-1] +  // Current element
+                             prefixSum[i-1][j] +    // Sum above
+                             prefixSum[i][j-1] -    // Sum to left
+                             prefixSum[i-1][j-1];   // Subtract overlap
         }
     }
     
-    // Get sum of elements from index left to right (inclusive)
-    rangeSum(left, right) {
-        // Sum from left to right = prefixSum[right+1] - prefixSum[left]
-        // This gives: (sum 0 to right) - (sum 0 to left-1) = sum left to right
-        return this.prefixSum[right + 1] - this.prefixSum[left];
-    }
-}
-
-// 2D Prefix Sum for matrix range queries
-class PrefixSum2D {
-    constructor(matrix) {
-        const rows = matrix.length;
-        const cols = matrix[0].length;
-        // Create 2D prefix sum array with extra row and column
-        this.prefixSum = Array(rows + 1).fill().map(() => Array(cols + 1).fill(0));
-        
-        // Build 2D prefix sum using inclusion-exclusion principle
-        for (let i = 1; i <= rows; i++) {
-            for (let j = 1; j <= cols; j++) {
-                this.prefixSum[i][j] = matrix[i-1][j-1] +  // Current element
-                                     this.prefixSum[i-1][j] +    // Sum above
-                                     this.prefixSum[i][j-1] -    // Sum to left
-                                     this.prefixSum[i-1][j-1];   // Subtract overlap
-            }
+    return {
+        // Get sum of rectangle from (row1,col1) to (row2,col2)
+        sumRegion: (row1, col1, row2, col2) => {
+            // Use inclusion-exclusion principle for 2D range
+            return prefixSum[row2+1][col2+1] -    // Total sum up to bottom-right
+                   prefixSum[row1][col2+1] -      // Subtract area above
+                   prefixSum[row2+1][col1] +      // Subtract area to left
+                   prefixSum[row1][col1];         // Add back overlap (subtracted twice)
         }
-    }
-    
-    // Get sum of rectangle from (row1,col1) to (row2,col2)
-    sumRegion(row1, col1, row2, col2) {
-        // Use inclusion-exclusion principle for 2D range
-        return this.prefixSum[row2+1][col2+1] -    // Total sum up to bottom-right
-               this.prefixSum[row1][col2+1] -      // Subtract area above
-               this.prefixSum[row2+1][col1] +      // Subtract area to left
-               this.prefixSum[row1][col1];         // Add back overlap (subtracted twice)
-    }
+    };
 }
 
-// Advanced prefix sum patterns for complex problems
-class PrefixSumPatterns {
+// Advanced prefix sum patterns for complex problems using functional approach
+const createPrefixSumPatterns = () => ({
     // Count subarrays with sum equal to k
-    static subarraySum(nums, k) {
+    subarraySum: (nums, k) => {
         const map = new Map();
         map.set(0, 1); // Handle case where prefix sum itself equals k
         let prefixSum = 0;
@@ -2746,10 +2824,10 @@ class PrefixSumPatterns {
         }
         
         return count;
-    }
+    },
     
     // Find maximum sum of any contiguous subarray (Kadane's algorithm)
-    static maxSubarraySum(nums) {
+    maxSubarraySum: (nums) => {
         let maxSum = nums[0];     // Global maximum
         let currentSum = nums[0]; // Current subarray sum
         
@@ -2764,13 +2842,31 @@ class PrefixSumPatterns {
         
         return maxSum;
     }
-}
+});
 ```
 
 ## Insights
 - **Time Complexity**: Build: O(n), Query: O(1)
 - **Space Complexity**: O(n) for 1D, O(n*m) for 2D
 - **Use Cases**: Range sum queries, subarray problems, cumulative operations
+
+## When to Use
+- When you have multiple range sum queries on static/semi-static data
+- When dealing with subarray sum problems
+- When you need cumulative statistics over ranges
+- When working with 2D matrices and need rectangle sum queries
+- When analyzing time series data with window operations
+- When solving problems involving contiguous sequences
+
+## Use Cases
+1. **Financial Analysis**: Calculating moving averages, portfolio returns
+2. **Image Processing**: Integral images for fast rectangle sum calculations
+3. **Data Analytics**: Time series analysis, trend calculation
+4. **Gaming**: Score calculations, leaderboard systems
+5. **Scientific Computing**: Statistical analysis over data ranges
+6. **Web Analytics**: Page view counts, user engagement metrics
+7. **Resource Management**: Bandwidth usage, memory consumption tracking
+8. **Machine Learning**: Feature engineering, sliding window operations
 
 ## LeetCode Examples
 - **303. Range Sum Query - Immutable** - Basic prefix sum application
