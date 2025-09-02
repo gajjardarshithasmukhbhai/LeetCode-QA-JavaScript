@@ -2224,3 +2224,569 @@ class PriorityQueue {
 - Task scheduling and rate limiting
 - Stream processing with time windows
 - Cache implementations (LRU with queue component)
+
+
+### 13. Heap
+
+## Description
+A heap is a complete binary tree that satisfies the heap property. In a min-heap, every parent node is smaller than or equal to its children. This data structure is efficiently implemented using an array where for any element at index `i`:
+- Parent is at index `(i-1)/2`
+- Left child is at index `2*i + 1`
+- Right child is at index `2*i + 2`
+
+The heap maintains its property through two key operations: heapifyUp (bubble up) and heapifyDown (bubble down).
+
+## Implementation
+```javascript
+class MinHeap {
+    constructor() {
+        this.heap = []; // Array to store heap elements
+    }
+    
+    // Calculate parent index for any given index
+    // Parent of node at index i is at (i-1)/2
+    getParentIndex(index) {
+        return Math.floor((index - 1) / 2);
+    }
+    
+    // Calculate left child index
+    // Left child of node at index i is at 2*i + 1
+    getLeftChildIndex(index) {
+        return 2 * index + 1;
+    }
+    
+    // Calculate right child index  
+    // Right child of node at index i is at 2*i + 2
+    getRightChildIndex(index) {
+        return 2 * index + 2;
+    }
+    
+    insert(value) {
+        // Step 1: Add new element at the end of array
+        this.heap.push(value);
+        // Step 2: Restore heap property by moving element up if needed
+        this.heapifyUp(this.heap.length - 1);
+    }
+    
+    extractMin() {
+        // Handle edge cases
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop();
+        
+        // Step 1: Store minimum element (root) to return
+        const min = this.heap[0];
+        // Step 2: Move last element to root position
+        this.heap[0] = this.heap.pop();
+        // Step 3: Restore heap property by moving root down if needed
+        this.heapifyDown(0);
+        return min;
+    }
+    
+    // Move element up the tree until heap property is satisfied
+    heapifyUp(index) {
+        const parentIndex = this.getParentIndex(index);
+        // If we haven't reached root AND parent is greater than current
+        if (parentIndex >= 0 && this.heap[parentIndex] > this.heap[index]) {
+            // Swap current element with its parent
+            [this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]];
+            // Recursively check the parent level
+            this.heapifyUp(parentIndex);
+        }
+    }
+    
+    // Move element down the tree until heap property is satisfied
+    heapifyDown(index) {
+        const leftIndex = this.getLeftChildIndex(index);
+        const rightIndex = this.getRightChildIndex(index);
+        let smallest = index; // Assume current is smallest
+        
+        // Check if left child exists and is smaller than current smallest
+        if (leftIndex < this.heap.length && this.heap[leftIndex] < this.heap[smallest]) {
+            smallest = leftIndex;
+        }
+        
+        // Check if right child exists and is smaller than current smallest
+        if (rightIndex < this.heap.length && this.heap[rightIndex] < this.heap[smallest]) {
+            smallest = rightIndex;
+        }
+        
+        // If smallest is not the current index, we need to swap and continue
+        if (smallest !== index) {
+            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            // Recursively heapify the affected subtree
+            this.heapifyDown(smallest);
+        }
+    }
+}
+```
+
+## Insights
+- **Time Complexity**: Insert/Delete: O(log n), Peek: O(1)
+- **Space Complexity**: O(n)
+- **Use Cases**: Priority queues, finding k largest/smallest elements
+
+## LeetCode Examples
+- **215. Kth Largest Element in an Array** - Use min heap to find kth largest
+- **23. Merge k Sorted Lists** - Use min heap to merge efficiently
+- **295. Find Median from Data Stream** - Use two heaps (max and min)
+
+---
+
+### 14.Segment Tree
+
+### Description
+A segment tree is a binary tree data structure used for storing intervals or segments. It allows querying which segments contain a given point efficiently. Each node in the tree represents a range/segment of the original array, and stores aggregate information (like sum, min, max) about that range.
+
+The tree structure:
+- Root represents the entire array range [0, n-1]
+- Each internal node represents a merge of its children's ranges
+- Leaves represent individual array elements
+- For a segment tree of size n, we need 4*n space in worst case
+
+## Implementation
+```javascript
+class SegmentTree {
+    constructor(arr) {
+        this.n = arr.length; // Store original array size
+        // Allocate 4*n space for segment tree (worst case for complete binary tree)
+        this.tree = new Array(4 * this.n);
+        // Build the tree starting from root node (index 0)
+        this.build(arr, 0, 0, this.n - 1);
+    }
+    
+    // Recursively build the segment tree
+    build(arr, node, start, end) {
+        if (start === end) {
+            // Leaf node: store the array element directly
+            this.tree[node] = arr[start];
+        } else {
+            // Internal node: merge children's values
+            const mid = Math.floor((start + end) / 2);
+            // Build left subtree (range: start to mid)
+            this.build(arr, 2 * node + 1, start, mid);
+            // Build right subtree (range: mid+1 to end)
+            this.build(arr, 2 * node + 2, mid + 1, end);
+            // Current node stores sum of its children (can be min, max, etc.)
+            this.tree[node] = this.tree[2 * node + 1] + this.tree[2 * node + 2];
+        }
+    }
+    
+    // Update value at specific index
+    update(node, start, end, idx, val) {
+        if (start === end) {
+            // Reached the leaf node corresponding to idx
+            this.tree[node] = val;
+        } else {
+            const mid = Math.floor((start + end) / 2);
+            if (idx <= mid) {
+                // Target index is in left subtree
+                this.update(2 * node + 1, start, mid, idx, val);
+            } else {
+                // Target index is in right subtree
+                this.update(2 * node + 2, mid + 1, end, idx, val);
+            }
+            // After updating child, update current node's value
+            this.tree[node] = this.tree[2 * node + 1] + this.tree[2 * node + 2];
+        }
+    }
+    
+    // Query sum in range [l, r]
+    query(node, start, end, l, r) {
+        // Case 1: Range is completely outside the node's range
+        if (r < start || end < l) return 0;
+        
+        // Case 2: Node's range is completely inside query range
+        if (l <= start && end <= r) return this.tree[node];
+        
+        // Case 3: Partial overlap - need to check both children
+        const mid = Math.floor((start + end) / 2);
+        // Get sum from left child + sum from right child
+        return this.query(2 * node + 1, start, mid, l, r) + 
+               this.query(2 * node + 2, mid + 1, end, l, r);
+    }
+    
+    // Public method to query range [l, r]
+    rangeQuery(l, r) {
+        return this.query(0, 0, this.n - 1, l, r);
+    }
+    
+    // Public method to update value at index idx
+    updateValue(idx, val) {
+        this.update(0, 0, this.n - 1, idx, val);
+    }
+}
+```
+
+## Insights
+- **Time Complexity**: Build: O(n), Query/Update: O(log n)
+- **Space Complexity**: O(n)
+- **Use Cases**: Range sum queries, range minimum/maximum queries
+
+## LeetCode Examples
+- **307. Range Sum Query - Mutable** - Direct segment tree application
+- **315. Count of Smaller Numbers After Self** - Use coordinate compression + segment tree
+- **327. Count of Range Sum** - Segment tree with prefix sums
+
+---
+
+### 15. LinkedList
+
+## Description
+A linked list is a linear data structure where elements are stored in nodes, and each node contains data and a reference (pointer) to the next node. Unlike arrays, linked lists don't store elements in contiguous memory locations. This allows for efficient insertion and deletion at any position, but requires sequential access to reach specific elements.
+
+Key characteristics:
+- Dynamic size (grows/shrinks during runtime)
+- Efficient insertion/deletion (O(1) if position is known)
+- Sequential access only (no random access like arrays)
+- Extra memory overhead for storing pointers
+
+## Implementation
+```javascript
+// Node structure: contains data and reference to next node
+class ListNode {
+    constructor(val = 0, next = null) {
+        this.val = val;   // Data stored in the node
+        this.next = next; // Reference to the next node
+    }
+}
+
+class LinkedList {
+    constructor() {
+        this.head = null; // Reference to the first node
+        this.size = 0;    // Track the number of elements
+    }
+    
+    // Add element to the beginning of the list
+    prepend(val) {
+        // Create new node with current head as its next
+        const newNode = new ListNode(val, this.head);
+        // Update head to point to new node
+        this.head = newNode;
+        this.size++;
+    }
+    
+    // Add element to the end of the list
+    append(val) {
+        const newNode = new ListNode(val);
+        
+        if (!this.head) {
+            // If list is empty, new node becomes head
+            this.head = newNode;
+        } else {
+            // Traverse to the end of the list
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            // Link the last node to new node
+            current.next = newNode;
+        }
+        this.size++;
+    }
+    
+    // Remove first occurrence of value
+    remove(val) {
+        if (!this.head) return false; // Empty list
+        
+        // If head node contains the value to remove
+        if (this.head.val === val) {
+            this.head = this.head.next; // Move head to next node
+            this.size--;
+            return true;
+        }
+        
+        // Search for the node to remove
+        let current = this.head;
+        while (current.next && current.next.val !== val) {
+            current = current.next;
+        }
+        
+        // If found, skip the node by updating links
+        if (current.next) {
+            current.next = current.next.next;
+            this.size--;
+            return true;
+        }
+        return false; // Value not found
+    }
+    
+    // Reverse the entire linked list
+    reverse() {
+        let prev = null;    // Previous node (starts as null)
+        let current = this.head; // Current node being processed
+        
+        while (current) {
+            const next = current.next; // Store next node before breaking link
+            current.next = prev;       // Reverse the link
+            prev = current;            // Move prev forward
+            current = next;            // Move current forward
+        }
+        
+        // Update head to the new first node (previously last)
+        this.head = prev;
+        return this.head;
+    }
+    
+    // Detect if there's a cycle in the list using Floyd's algorithm
+    hasCycle() {
+        let slow = this.head; // Moves one step at a time
+        let fast = this.head; // Moves two steps at a time
+        
+        while (fast && fast.next) {
+            slow = slow.next;      // Move slow pointer one step
+            fast = fast.next.next; // Move fast pointer two steps
+            
+            // If they meet, there's a cycle
+            if (slow === fast) return true;
+        }
+        return false; // Fast pointer reached end, no cycle
+    }
+}
+```
+
+## Insights
+- **Time Complexity**: Access: O(n), Insert/Delete: O(1) if position known
+- **Space Complexity**: O(1) for operations, O(n) for storage
+- **Use Cases**: Dynamic size requirements, frequent insertions/deletions
+
+## LeetCode Examples
+- **206. Reverse Linked List** - Basic reversal technique
+- **141. Linked List Cycle** - Floyd's cycle detection algorithm
+- **21. Merge Two Sorted Lists** - Merge technique
+- **19. Remove Nth Node From End** - Two pointer technique
+
+---
+
+### 16. Bit Manipulations
+
+## Description
+Bit manipulation involves directly manipulating bits in binary representation of numbers. It's one of the fastest operations as processors can handle bitwise operations very efficiently. Common operations include setting, clearing, toggling bits, and checking if specific bits are set.
+
+Key concepts:
+- AND (&): Both bits must be 1 to result in 1
+- OR (|): At least one bit must be 1 to result in 1  
+- XOR (^): Bits must be different to result in 1
+- NOT (~): Flips all bits
+- Left shift (<<): Multiplies by 2^n
+- Right shift (>>): Divides by 2^n
+
+## Common Operations
+```javascript
+class BitManipulation {
+    // Check if the bit at position 'pos' is set (1) or not (0)
+    static isBitSet(num, pos) {
+        // Create a mask with only the pos-th bit set: 1 << pos
+        // AND with num: if bit is set, result is non-zero
+        return (num & (1 << pos)) !== 0;
+    }
+    
+    // Set the bit at position 'pos' to 1
+    static setBit(num, pos) {
+        // Create mask with pos-th bit set, OR with num
+        // OR operation: 0|1=1, 1|1=1 (sets bit without affecting others)
+        return num | (1 << pos);
+    }
+    
+    // Clear the bit at position 'pos' (set to 0)
+    static clearBit(num, pos) {
+        // Create mask with all bits 1 except pos-th bit (using NOT)
+        // AND with num: 0&anything=0, 1&1=1 (clears only target bit)
+        return num & ~(1 << pos);
+    }
+    
+    // Toggle the bit at position 'pos' (0→1, 1→0)
+    static toggleBit(num, pos) {
+        // XOR with mask: 0^1=1, 1^1=0 (flips only the target bit)
+        return num ^ (1 << pos);
+    }
+    
+    // Count number of set bits (1s) in the number
+    static countSetBits(num) {
+        let count = 0;
+        while (num) {
+            count += num & 1; // Check if least significant bit is 1
+            num >>= 1;        // Right shift to check next bit
+        }
+        return count;
+    }
+    
+    // Check if number is a power of 2
+    static isPowerOfTwo(num) {
+        // Powers of 2 have exactly one bit set
+        // num & (num-1) clears the rightmost set bit
+        // If only one bit was set, result becomes 0
+        return num > 0 && (num & (num - 1)) === 0;
+    }
+    
+    // Find the single number that appears once (others appear twice)
+    static singleNumber(nums) {
+        // XOR property: a^a=0, a^0=a
+        // XORing all numbers cancels out duplicates, leaves single number
+        return nums.reduce((result, num) => result ^ num, 0);
+    }
+    
+    // Generate all possible subsets using bit masking
+    static getAllSubsets(nums) {
+        const result = [];
+        const n = nums.length;
+        
+        // Generate all numbers from 0 to 2^n - 1
+        // Each number represents a subset (bit pattern)
+        for (let i = 0; i < (1 << n); i++) {
+            const subset = [];
+            // Check each bit position
+            for (let j = 0; j < n; j++) {
+                // If j-th bit is set in i, include nums[j] in subset
+                if (i & (1 << j)) {
+                    subset.push(nums[j]);
+                }
+            }
+            result.push(subset);
+        }
+        return result;
+    }
+}
+```
+
+## Insights
+- **Time Complexity**: Most operations O(1), counting bits O(log n)
+- **Space Complexity**: O(1) for basic operations
+- **Use Cases**: Efficient storage, fast operations, subset generation
+
+## LeetCode Examples
+- **136. Single Number** - XOR to find unique element
+- **191. Number of 1 Bits** - Count set bits
+- **338. Counting Bits** - Dynamic programming with bit manipulation
+- **78. Subsets** - Generate all subsets using bit masks
+
+---
+
+### 16. Prefix Sums
+
+## Description
+Prefix sum is a preprocessing technique that calculates cumulative sums from the beginning of an array up to each position. This allows for constant-time range sum queries after O(n) preprocessing. The concept extends to 2D arrays for rectangle sum queries and various other cumulative operations.
+
+Key insight: Range sum from index i to j = prefixSum[j+1] - prefixSum[i]
+
+This works because:
+- prefixSum[j+1] = sum of elements from 0 to j
+- prefixSum[i] = sum of elements from 0 to i-1
+- Difference gives sum from i to j
+
+## Implementation
+```javascript
+class PrefixSum {
+    constructor(nums) {
+        // Build prefix sum array with extra element at start
+        this.prefixSum = [0]; // prefixSum[0] = 0 for easier calculation
+        
+        // Calculate cumulative sum: prefixSum[i] = sum of first i elements
+        for (let i = 0; i < nums.length; i++) {
+            this.prefixSum.push(this.prefixSum[this.prefixSum.length - 1] + nums[i]);
+        }
+    }
+    
+    // Get sum of elements from index left to right (inclusive)
+    rangeSum(left, right) {
+        // Sum from left to right = prefixSum[right+1] - prefixSum[left]
+        // This gives: (sum 0 to right) - (sum 0 to left-1) = sum left to right
+        return this.prefixSum[right + 1] - this.prefixSum[left];
+    }
+}
+
+// 2D Prefix Sum for matrix range queries
+class PrefixSum2D {
+    constructor(matrix) {
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        // Create 2D prefix sum array with extra row and column
+        this.prefixSum = Array(rows + 1).fill().map(() => Array(cols + 1).fill(0));
+        
+        // Build 2D prefix sum using inclusion-exclusion principle
+        for (let i = 1; i <= rows; i++) {
+            for (let j = 1; j <= cols; j++) {
+                this.prefixSum[i][j] = matrix[i-1][j-1] +  // Current element
+                                     this.prefixSum[i-1][j] +    // Sum above
+                                     this.prefixSum[i][j-1] -    // Sum to left
+                                     this.prefixSum[i-1][j-1];   // Subtract overlap
+            }
+        }
+    }
+    
+    // Get sum of rectangle from (row1,col1) to (row2,col2)
+    sumRegion(row1, col1, row2, col2) {
+        // Use inclusion-exclusion principle for 2D range
+        return this.prefixSum[row2+1][col2+1] -    // Total sum up to bottom-right
+               this.prefixSum[row1][col2+1] -      // Subtract area above
+               this.prefixSum[row2+1][col1] +      // Subtract area to left
+               this.prefixSum[row1][col1];         // Add back overlap (subtracted twice)
+    }
+}
+
+// Advanced prefix sum patterns for complex problems
+class PrefixSumPatterns {
+    // Count subarrays with sum equal to k
+    static subarraySum(nums, k) {
+        const map = new Map();
+        map.set(0, 1); // Handle case where prefix sum itself equals k
+        let prefixSum = 0;
+        let count = 0;
+        
+        for (const num of nums) {
+            prefixSum += num;
+            
+            // If (prefixSum - k) exists, we found subarrays ending at current position
+            // with sum k (current prefixSum - previous prefixSum = k)
+            if (map.has(prefixSum - k)) {
+                count += map.get(prefixSum - k);
+            }
+            
+            // Store frequency of current prefix sum
+            map.set(prefixSum, (map.get(prefixSum) || 0) + 1);
+        }
+        
+        return count;
+    }
+    
+    // Find maximum sum of any contiguous subarray (Kadane's algorithm)
+    static maxSubarraySum(nums) {
+        let maxSum = nums[0];     // Global maximum
+        let currentSum = nums[0]; // Current subarray sum
+        
+        for (let i = 1; i < nums.length; i++) {
+            // Either extend current subarray or start new one
+            // If currentSum + nums[i] < nums[i], better to start fresh
+            currentSum = Math.max(nums[i], currentSum + nums[i]);
+            
+            // Update global maximum
+            maxSum = Math.max(maxSum, currentSum);
+        }
+        
+        return maxSum;
+    }
+}
+```
+
+## Insights
+- **Time Complexity**: Build: O(n), Query: O(1)
+- **Space Complexity**: O(n) for 1D, O(n*m) for 2D
+- **Use Cases**: Range sum queries, subarray problems, cumulative operations
+
+## LeetCode Examples
+- **303. Range Sum Query - Immutable** - Basic prefix sum application
+- **560. Subarray Sum Equals K** - Prefix sum with hashmap
+- **304. Range Sum Query 2D - Immutable** - 2D prefix sum
+- **53. Maximum Subarray** - Kadane's algorithm (variant of prefix sum)
+- **974. Subarray Sums Divisible by K** - Prefix sum with modular arithmetic
+
+---
+
+## Quick Reference
+
+| Algorithm | Build Time | Query Time | Space | Best Use Case |
+|-----------|------------|------------|-------|---------------|
+| Heap | O(n) | O(log n) | O(n) | Priority operations |
+| Segment Tree | O(n) | O(log n) | O(n) | Range queries |
+| LinkedList | O(1) | O(n) | O(n) | Dynamic insertions |
+| Bit Manipulation | O(1) | O(1) | O(1) | Efficient operations |
+| Prefix Sum | O(n) | O(1) | O(n) | Range sum queries |
